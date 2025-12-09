@@ -10,12 +10,14 @@ export default function ProductAdd() {
   const [productName, setProductName] = useState("");
   const [productSlug, setProductSlug] = useState("");
   const [catId, setCatId] = useState("");
+  const [brandId, setBrandId] = useState("");
   const [price, setPrice] = useState("");
   const [content, setContent] = useState("");
   const [description, setDescription] = useState("");
   const [productStatus, setProductStatus] = useState("1");
   const [images, setImages] = useState([]); // nhiều ảnh
   const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
 
   // attribute state
   const [attributes, setAttributes] = useState([]);
@@ -27,6 +29,7 @@ export default function ProductAdd() {
 
   useEffect(() => {
     axios.get("http://localhost:8000/api/category").then((res) => setCategories(res.data.data));
+    axios.get("http://localhost:8000/api/brand").then((res) => setBrands(res.data.data));
     axios.get("http://localhost:8000/api/attribute").then((res) => setAttributes(res.data));
   }, []);
 
@@ -58,6 +61,11 @@ export default function ProductAdd() {
     }
   };
 
+//   console.log({
+//   brandId,
+//   catId,
+//   productName
+// });
   // -------------------------------
   // Submit form
   // -------------------------------
@@ -68,6 +76,7 @@ export default function ProductAdd() {
     formData.append("name", productName);
     formData.append("slug", productSlug);
     formData.append("category_id", catId);
+    formData.append("brand_id", brandId);
     formData.append("price_buy", price);
     formData.append("content", content);
     formData.append("description", description);
@@ -279,6 +288,24 @@ export default function ProductAdd() {
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Thương hiệu */}
+          <div>
+            <label className="block mb-1 font-medium">Thương hiệu</label>
+            <select
+              className="w-full border rounded px-3 py-2"
+              value={brandId}
+              required
+              onChange={(e) => setBrandId(e.target.value)}
+            >
+              <option value="">-- Chọn thương hiệu --</option>
+              {brands.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.name}
                 </option>
               ))}
             </select>

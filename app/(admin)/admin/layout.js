@@ -114,6 +114,9 @@ export default function AdminLayout({ children }) {
               <a href="/admin/category" className="flex items-center px-3 py-2 rounded hover:bg-gray-700">
                 <i className="fa fa-list mr-2"></i> Danh mục
               </a>
+              <a href="/admin/brand" className="flex items-center px-3 py-2 rounded hover:bg-gray-700">
+                <i className="fa fa-list mr-2"></i> Thương hiệu
+              </a>
               <a href="/admin/product" className="flex items-center px-3 py-2 rounded hover:bg-gray-700">
                 <i className="fa fa-box mr-2"></i> Sản phẩm
               </a>

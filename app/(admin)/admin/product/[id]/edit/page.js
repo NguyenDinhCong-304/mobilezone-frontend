@@ -12,6 +12,7 @@ export default function ProductEdit() {
     const [productName, setProductName] = useState("");
     const [productSlug, setProductSlug] = useState("");
     const [catId, setCatId] = useState("");
+    const [brandId, setBrandId] = useState("");
     const [price, setPrice] = useState("");
     const [description, setDescription] = useState("");
     const [image, setImage] = useState("");
@@ -20,6 +21,8 @@ export default function ProductEdit() {
 
     // State danh mục
     const [categories, setCategories] = useState([]);
+
+    const [brands, setBrands] = useState([]);
 
     const [attributeList, setAttributeList] = useState([]);
 
@@ -39,6 +42,20 @@ export default function ProductEdit() {
             }
         };
         fetchCategories();
+    }, []);
+
+    // Lấy danh sách thương hiệu từ DB
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const res = await axios.get("http://localhost:8000/api/brand");
+                setBrands(res.data.data);
+            } catch (err) {
+                console.error(err);
+                setError("Không thể tải thương hiệu");
+            }
+        };
+        fetchBrands(); 
     }, []);
 
     // Lấy danh sách thuộc tính từ DB
@@ -64,6 +81,7 @@ export default function ProductEdit() {
                 setProductName(data.name);
                 setProductSlug(data.slug);
                 setCatId(data.category_id);
+                setBrandId(data.brand_id);
                 setPrice(data.price_buy);
                 setDescription(data.description);
                 setImage(`http://localhost:8000/storage/${data.thumbnail}`);
@@ -97,6 +115,7 @@ export default function ProductEdit() {
             formData.append("name", productName);
             formData.append("slug", productSlug);
             formData.append("category_id", catId);
+            formData.append("brand_id", brandId);
             formData.append("price_buy", price);
             formData.append("description", description);
             formData.append("status", 1);
@@ -172,6 +191,24 @@ export default function ProductEdit() {
                         {categories.map((cat) => (
                             <option key={cat.id} value={cat.id}>
                                 {cat.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                {/*Thương hiệu*/}
+                <div>
+                    <label className="block mb-1 font-medium">Thương hiệu</label>
+                    <select
+                        className="w-full border rounded px-3 py-2"
+                        value={brandId}
+                        onChange={(e) => setBrandId(e.target.value)}
+                        required
+                    >
+                        <option value="">-- Chọn thương hiệu --</option>
+                        {brands.map((brand) => (
+                            <option key={brand.id} value={brand.id}>
+                                {brand.name}
                             </option>
                         ))}
                     </select>

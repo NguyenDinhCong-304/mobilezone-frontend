@@ -7,6 +7,7 @@ import axios from "axios";
 export default function ProductList() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
@@ -17,6 +18,7 @@ export default function ProductList() {
 
     // LỌC
     const [filterCategory, setFilterCategory] = useState("");
+    const [filterBrand, setFilterBrand] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
 
     useEffect(() => {
@@ -38,10 +40,19 @@ export default function ProductList() {
             .finally(() => setLoading(false));
     }, [page, search, filterCategory, filterStatus]);
 
+    //Lấy danh mục
     useEffect(() => {
         axios
             .get("http://localhost:8000/api/category")
             .then((res) => setCategories(res.data.data || res.data))
+            .catch((err) => console.error(err));
+    }, []);
+
+    //Lấy thương hiệu
+    useEffect(() => {
+        axios
+            .get("http://localhost:8000/api/brand")
+            .then((res) => setBrands(res.data.data || res.data))
             .catch((err) => console.error(err));
     }, []);
 
@@ -93,6 +104,8 @@ export default function ProductList() {
 
             {/* BỘ LỌC */}
             <div className="flex gap-4 mb-4">
+
+                {/* LỌC THEO DANH MỤC */}
                 <select
                     className="border px-3 py-2 rounded"
                     value={filterCategory}
@@ -108,7 +121,25 @@ export default function ProductList() {
                         </option>
                     ))}
                 </select>
+                
+                {/* LỌC THEO THƯƠNG HIỆU */}
+                <select
+                    className="border px-3 py-2 rounded"
+                    value={filterBrand}
+                    onChange={(e) => {
+                        setPage(1);
+                        setFilterBrand(e.target.value);
+                    }}
+                >
+                    <option value="">-- Tất cả thương hiệu --</option>
+                    {brands.map((brand) => (
+                        <option key={brand.id} value={brand.id}>
+                            {brand.name}
+                        </option>
+                    ))}
+                </select>
 
+                {/* LỌC THEO TRẠNG THÁI */}
                 <select
                     className="border px-3 py-2 rounded"
                     value={filterStatus}
@@ -136,6 +167,7 @@ export default function ProductList() {
                         <th className="border p-2">Hình</th>
                         <th className="border p-2">Tên</th>
                         <th className="border p-2">Danh mục</th>
+                        <th className="border p-2">Thương hiệu</th>
                         <th className="border p-2">Giá</th>
                         <th className="border p-2">Kho</th>
                         <th className="border p-2">Khuyến mãi</th>
@@ -161,6 +193,7 @@ export default function ProductList() {
                                 </td>
                                 <td className="border p-2">{p.name}</td>
                                 <td className="border p-2">{p.category.name}</td>
+                                <td className="border p-2">{p.brand?.name}</td>
                                 <td className="border p-2">
                                     {p.price_buy.toLocaleString("vi-VN")} đ
                                 </td>
