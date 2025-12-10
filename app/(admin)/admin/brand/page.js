@@ -26,7 +26,7 @@ export default function CategoryList() {
         }
     };
 
-    // 👇 Gọi lại khi page, search, hoặc status thay đổi
+    // Gọi lại khi page, search, hoặc status thay đổi
     useEffect(() => {
         fetchBrands();
     }, [page, status]);
@@ -94,10 +94,10 @@ export default function CategoryList() {
                     </div>
 
                     <a
-                        href="/admin/category/add"
+                        href="/admin/brand/add"
                         className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
                     >
-                        + Thêm danh mục
+                        + Thêm thương hiệu
                     </a>
                 </form>
 
@@ -111,9 +111,8 @@ export default function CategoryList() {
                                 <th className="border p-2">ID</th>
                                 <th className="border p-2">Tên</th>
                                 <th className="border p-2">Slug</th>
-                                <th className="border p-2">Ảnh</th>
-                                <th className="border p-2">Danh mục cha</th>
-                                <th className="border p-2">Vị trí</th>
+                                <th className="border p-2">Logo</th>
+                                <th className="border p-2">Quốc gia</th>
                                 <th className="border p-2">Mô tả</th>
                                 <th className="border p-2">Trạng thái</th>
                                 <th className="border p-2">Hành động</th>
@@ -128,9 +127,9 @@ export default function CategoryList() {
                                         <td className="border p-2">{brand.name}</td>
                                         <td className="border p-2">{brand.slug}</td>
                                         <td className="border p-2">
-                                            {brand.image ? (
+                                            {brand.logo ? (
                                                 <img
-                                                    src={`http://localhost:8000/storage/${brand.image}`}
+                                                    src={`http://localhost:8000/storage/${brand.logo}`}
                                                     alt={brand.name}
                                                     className="w-16 h-16 object-cover mx-auto"
                                                 />
@@ -138,8 +137,7 @@ export default function CategoryList() {
                                                 "Không có"
                                             )}
                                         </td>
-                                        <td className="border p-2">{brand.parent_id ?? "Không có"}</td>
-                                        <td className="border p-2">{brand.sort_order ?? "Không có"}</td>
+                                        <td className="border p-2">{brand.country}</td>
                                         <td className="border p-2">{brand.description ?? "Không có"}</td>
                                         <td className="border p-2">
                                             {Number(brand.status) === 1 ? (
@@ -154,7 +152,7 @@ export default function CategoryList() {
                                         </td>
                                         <td className="space-x-3">
                                             <a
-                                                href={`/admin/category/${brand.id}/edit`}
+                                                href={`/admin/brand/${brand.id}/edit`}
                                                 className="text-blue-600 hover:underline"
                                             >
                                                 <i className="fa fa-pencil"></i>
