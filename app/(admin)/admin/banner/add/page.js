@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function BannerAdd() {
   const router = useRouter();
@@ -27,8 +28,8 @@ export default function BannerAdd() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (!image) {
-        alert("Vui lòng chọn ảnh trước khi thêm banner!");
+      if (!form.image) {
+        toast.warning("Vui lòng chọn ảnh trước khi thêm banner!");
         return;
       }
       const formData = new FormData();
@@ -40,11 +41,11 @@ export default function BannerAdd() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Thêm banner thành công!");
+      toast.success("Thêm banner thành công!");
       router.push("/admin/banner");
     } catch (err) {
       console.error(err);
-      alert("Lỗi khi thêm banner!");
+      toast.error("Lỗi khi thêm banner!");
     }
   };
 

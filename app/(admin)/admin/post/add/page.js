@@ -1,18 +1,31 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import useSummernote from "../../_hooks/useSummernote";
 
 export default function PostAddPage() {
     const [topics, setTopics] = useState([]);
+    const [content, setContent] = useState("");
+    const [description, setDescription] = useState("");
     const [form, setForm] = useState({
         topic_id: "",
         title: "",
-        description: "",
-        content: "",
         status: 1,
     });
     const [image, setImage] = useState(null);
     const [message, setMessage] = useState("");
+
+    const contentRef = useSummernote({
+        height: 300,
+        placeholder: "Nội dung chi tiết...",
+        onChange: setContent,
+    });
+
+    const descriptionRef = useSummernote({
+        height: 150,
+        placeholder: "Mô tả ngắn...",
+        onChange: setDescription,
+    });
 
     // Lấy danh sách chủ đề
     useEffect(() => {
@@ -28,14 +41,25 @@ export default function PostAddPage() {
         setMessage("");
 
         const data = new FormData();
-        Object.keys(form).forEach((key) => data.append(key, form[key]));
+
+        // append các field thường
+        Object.keys(form).forEach((key) => {
+            data.append(key, form[key]);
+        });
+
+        // append từ Summernote
+        data.append("content", content);
+        data.append("description", description);
+
         if (image) data.append("image", image);
 
         try {
             const res = await axios.post("http://localhost:8000/api/post", data, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+
             setMessage(res.data.message || "Thêm bài viết thành công!");
+
             setForm({
                 topic_id: "",
                 title: "",
@@ -43,12 +67,14 @@ export default function PostAddPage() {
                 content: "",
                 status: 1,
             });
+
             setImage(null);
         } catch (err) {
-            console.error("Lỗi khi thêm bài viết:", err);
+            console.error(err);
             setMessage("Thêm bài viết thất bại!");
         }
     };
+
 
     return (
         <div className="w-full mx-auto text-black">
@@ -110,12 +136,9 @@ export default function PostAddPage() {
                 <div>
                     <label className="block font-medium mb-1">Mô tả</label>
                     <textarea
-                        value={form.description}
-                        onChange={(e) =>
-                            setForm({ ...form, description: e.target.value })
-                        }
-                        className="w-full border rounded p-2 h-20"
-                        placeholder="Mô tả ngắn gọn..."
+                        ref={descriptionRef}
+                        name="description"
+                        className="w-full border rounded px-3 py-2"
                     />
                 </div>
 
@@ -123,11 +146,9 @@ export default function PostAddPage() {
                 <div>
                     <label className="block font-medium mb-1">Nội dung</label>
                     <textarea
-                        value={form.content}
-                        onChange={(e) => setForm({ ...form, content: e.target.value })}
-                        className="w-full border rounded p-2 h-40"
-                        placeholder="Nhập nội dung chi tiết bài viết..."
-                        required
+                        ref={contentRef}
+                        name="content"
+                        className="w-full border rounded px-3 py-2"
                     />
                 </div>
 

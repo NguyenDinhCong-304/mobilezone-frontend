@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
-
 export default function EditCategory() {
   const { id } = useParams();
   const router = useRouter();
@@ -34,6 +33,9 @@ export default function EditCategory() {
         setSortOrder(cat.sort_order ?? 0);
         setDescription(cat.description ?? "");
         setStatus(cat.status ?? 1);
+        if (cat.image) {
+          setImage(`http://localhost:8000/storage/${cat.image}`);
+        }
       } catch (err) {
         toast.error("Lỗi: " + err.message);
       } finally {
@@ -153,6 +155,10 @@ export default function EditCategory() {
 
         <div>
           <label className="block">Hình ảnh</label>
+          {typeof image === "string" && (
+            <img src={image} className="w-32 mb-2 border rounded" />
+          )}
+
           <input
             type="file"
             onChange={(e) => setImage(e.target.files[0])}

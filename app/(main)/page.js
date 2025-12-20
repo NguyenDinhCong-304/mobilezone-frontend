@@ -1,25 +1,53 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
 import Image from "next/image";
 import CategorySection from "./_components/CategorySection";
 import ProductSale from "./_components/ProductSale"
 import ProductNew from "./_components/ProductNew"
 import PostNew from "./_components/PostNew";
 export default function Home() {
+
+  const [banners, setBanners] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8000/api/banner?position=slideshow&status=1")
+      .then((res) => setBanners(res.data.data))
+      .catch((err) => console.error("Lỗi banner:", err));
+  }, []);
+
   return (
     <>
       <div className="container">
         {/* <!-- ========================= SECTION MAIN  ========================= --> */}
         <div id="carousel1_indicator" className="slider-home-banner carousel slide" data-ride="carousel">
           <ol className="carousel-indicators">
-            <li data-target="#carousel1_indicator" data-slide-to="0" className="active"></li>
-            <li data-target="#carousel1_indicator" data-slide-to="1"></li>
+            {banners.map((_, index) => (
+              <li
+                key={index}
+                data-target="#carousel1_indicator"
+                data-slide-to={index}
+                className={index === 0 ? "active" : ""}
+              />
+            ))}
           </ol>
           <div className="carousel-inner">
-            <div className="carousel-item active">
-              <img src="images/banners/slide-lg-3.jpg" alt="First slide" />
-            </div>
-            <div className="carousel-item">
-              <img src="images/banners/slide-lg-2.jpg" alt="Second slide" />
-            </div>
+            {banners.map((banner, index) => (
+              <div
+                key={banner.id}
+                className={`carousel-item ${index === 0 ? "active" : ""}`}
+              >
+                <a href={banner.link || "#"}>
+                  <img
+                    src={`http://localhost:8000/storage/${banner.image}`}
+                    className="d-block w-100"
+                    alt={banner.name}
+                  />
+                </a>
+              </div>
+            ))}
           </div>
           <a className="carousel-control-prev" href="#carousel1_indicator" role="button" data-slide="prev">
             <span className="carousel-control-prev-icon" aria-hidden="true"></span>

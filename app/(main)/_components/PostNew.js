@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import DOMPurify from "dompurify";
+
 
 export default function PostNew() {
     const [posts, setPosts] = useState([]);
@@ -33,9 +35,10 @@ export default function PostNew() {
                                 />
                                 <div className="card-body">
                                     <h6 className="title">{post.title}</h6>
-                                    <p className="small text-uppercase text-muted">
-                                        {post.description}
-                                    </p>
+                                    <p className="small text-uppercase text-muted" 
+                                        dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(post.description)
+                                    }}/>
                                 </div>
                             </article>
                         </div>

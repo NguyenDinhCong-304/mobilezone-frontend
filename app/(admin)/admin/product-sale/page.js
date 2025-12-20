@@ -4,8 +4,8 @@ import axios from "axios";
 import ProductSelector from "../_component/ProductSelector";
 
 export default function ProductSaleList() {
-  const [isClient, setIsClient] = useState(false); // ✅ thêm dòng này
-  useEffect(() => setIsClient(true), []); // ✅ xác định client-side
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => setIsClient(true), []);
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -39,7 +39,7 @@ export default function ProductSaleList() {
     const res = await axios.get("http://localhost:8000/api/product", {
       params: { per_page: 100 },
     });
-    setProducts(res.data.data || res.data); // hỗ trợ cả 2 dạng JSON
+    setProducts(res.data.data || res.data);
   };
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function ProductSaleList() {
     fetchProducts();
   }, [page, status]);
 
-  if (!isClient) return null; // ✅ ngăn SSR render sớm
+  if (!isClient) return null;
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -73,7 +73,6 @@ export default function ProductSaleList() {
     }
   };
 
-  //Thêm khuyến mãi
   // Thêm khuyến mãi
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -86,7 +85,7 @@ export default function ProductSaleList() {
     try {
       const payload = {
         ...form,
-        product_id: selectedProduct.value, // ✅ Lấy ID từ ProductSelector
+        product_id: selectedProduct.value, // Lấy ID từ ProductSelector
       };
 
       await axios.post("http://localhost:8000/api/productsale", payload);
@@ -101,7 +100,7 @@ export default function ProductSaleList() {
         date_end: "",
         status: 1,
       });
-      setSelectedProduct(null); // ✅ Reset chọn sản phẩm
+      setSelectedProduct(null); // Reset chọn sản phẩm
       fetchSales();
     } catch (err) {
       if (err.response?.status === 422) {
@@ -154,19 +153,6 @@ export default function ProductSaleList() {
             required
           />
 
-          {/* <select
-            value={form.product_id}
-            onChange={(e) => setForm({ ...form, product_id: e.target.value })}
-            className="border px-3 py-2 rounded"
-            required
-          >
-            <option value="">-- Chọn sản phẩm --</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select> */}
           <ProductSelector
             value={selectedProduct}
             onChange={(option) => {

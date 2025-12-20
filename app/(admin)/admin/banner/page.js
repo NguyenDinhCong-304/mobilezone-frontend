@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function BannerList() {
     const [banners, setBanners] = useState([]);
@@ -34,18 +35,47 @@ export default function BannerList() {
         setPage(1); // Reset về trang đầu khi tìm
         fetchBanners();
     };
-    
-    const handleDelete = async (id) => {
-        if (!confirm("Bạn có chắc muốn xóa banner này không?")) return;
 
-        try {
-            const res = await axios.delete(`http://localhost:8000/api/banner/${id}`);
-            alert(res.data.message || "Xóa thành công!");
-            fetchBanners(page);
-        } catch (err) {
-            console.error(err);
-            alert("Lỗi khi xóa banner!");
-        }
+    const handleDelete = async (id) => {
+        toast(
+            ({ closeToast }) => (
+                <div>
+                    <p className="font-semibold mb-2">
+                        Bạn có chắc muốn xóa banner này?
+                    </p>
+                    <div className="flex justify-end gap-2">
+                        <button
+                            onClick={async () => {
+                                try {
+                                    await axios.delete(`http://localhost:8000/api/banner/${id}`);
+                                    toast.success("Xóa banner thành công!");
+                                    fetchBanners();
+                                } catch (err) {
+                                    console.error(err);
+                                    toast.error("Lỗi khi xóa banner!");
+                                }
+                                closeToast();
+                            }}
+                            className="bg-red-600 text-white px-3 py-1 rounded"
+                        >
+                            Xóa
+                        </button>
+
+                        <button
+                            onClick={closeToast}
+                            className="bg-gray-300 px-3 py-1 rounded"
+                        >
+                            Hủy
+                        </button>
+                    </div>
+                </div>
+            ),
+            {
+                autoClose: false,
+                closeOnClick: false,
+                closeButton: false,
+            }
+        );
     };
 
     if (loading) {

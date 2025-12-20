@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import slugify from "slugify";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import useSummernote from "../../_hooks/useSummernote";
 
 export default function ProductAdd() {
   const router = useRouter();
@@ -26,6 +27,18 @@ export default function ProductAdd() {
   const [productAttrs, setProductAttrs] = useState([]);
   const [newAttr, setNewAttr] = useState("");
   const [showAttrForm, setShowAttrForm] = useState(false);
+
+  const contentRef = useSummernote({
+    height: 150,
+    placeholder: "Mô tả ngắn sản phẩm...",
+    onChange: setContent,
+  });
+
+  const descriptionRef = useSummernote({
+    height: 300,
+    placeholder: "Nội dung chi tiết sản phẩm...",
+    onChange: setDescription,
+  });
 
   useEffect(() => {
     axios.get("http://localhost:8000/api/category").then((res) => setCategories(res.data.data));
@@ -61,11 +74,11 @@ export default function ProductAdd() {
     }
   };
 
-//   console.log({
-//   brandId,
-//   catId,
-//   productName
-// });
+  //   console.log({
+  //   brandId,
+  //   catId,
+  //   productName
+  // });
   // -------------------------------
   // Submit form
   // -------------------------------
@@ -155,10 +168,9 @@ export default function ProductAdd() {
           <div>
             <label className="block mb-1 font-medium">Mô tả ngắn</label>
             <textarea
+              ref={descriptionRef}
+              name="description"
               className="w-full border rounded px-3 py-2"
-              rows="2"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
             />
           </div>
 
@@ -166,10 +178,9 @@ export default function ProductAdd() {
           <div>
             <label className="block mb-1 font-medium">Nội dung chi tiết</label>
             <textarea
+              ref={contentRef}
+              name="content"
               className="w-full border rounded px-3 py-2"
-              rows="5"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 

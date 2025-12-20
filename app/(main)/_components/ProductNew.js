@@ -30,7 +30,7 @@ export default function ProductSale() {
                         <a href="#" className="btn btn-outline-primary rounded-pill">
                             Xem ngay
                         </a>
-                        <Image src="/images/items/transparent-1911160__340.webp" alt="Banner" width={250} height={200} className="img-bg mt-3 rounded" />
+                        <Image src="/images/items/transparent-1911160__340.webp" alt="Banner" width={250} height={200} priority style={{ width: "100%", height: "auto" }} className="img-bg mt-3 rounded" />
                     </div>
                 </div>
 

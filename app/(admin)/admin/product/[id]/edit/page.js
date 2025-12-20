@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import slugify from "slugify";
+import useSummernote from "../../../_hooks/useSummernote";
 
 export default function ProductEdit() {
     const { id } = useParams();
@@ -14,10 +15,23 @@ export default function ProductEdit() {
     const [catId, setCatId] = useState("");
     const [brandId, setBrandId] = useState("");
     const [price, setPrice] = useState("");
+    const [content, setContent] = useState("");
     const [description, setDescription] = useState("");
     const [image, setImage] = useState("");
     const [newImage, setNewImage] = useState(null);
     const [attributes, setAttributes] = useState([{ name: "", value: "" }]);
+
+    const contentRef = useSummernote({
+        height: 150,
+        value: content,
+        onChange: setContent,
+    });
+
+    const descriptionRef = useSummernote({
+        height: 150,
+        value: description,
+        onChange: setDescription,
+    });
 
     // State danh mục
     const [categories, setCategories] = useState([]);
@@ -55,7 +69,7 @@ export default function ProductEdit() {
                 setError("Không thể tải thương hiệu");
             }
         };
-        fetchBrands(); 
+        fetchBrands();
     }, []);
 
     // Lấy danh sách thuộc tính từ DB
@@ -83,6 +97,7 @@ export default function ProductEdit() {
                 setCatId(data.category_id);
                 setBrandId(data.brand_id);
                 setPrice(data.price_buy);
+                setContent(data.content);
                 setDescription(data.description);
                 setImage(`http://localhost:8000/storage/${data.thumbnail}`);
                 if (data.attributes && Array.isArray(data.attributes)) {
@@ -117,6 +132,7 @@ export default function ProductEdit() {
             formData.append("category_id", catId);
             formData.append("brand_id", brandId);
             formData.append("price_buy", price);
+            formData.append("content", content);
             formData.append("description", description);
             formData.append("status", 1);
 
@@ -124,7 +140,7 @@ export default function ProductEdit() {
                 formData.append("thumbnail", newImage);
             }
 
-            // ✅ Gửi attributes
+            //Gửi attributes
             formData.append("attributes", JSON.stringify(attributes));
 
             await axios.post(`http://localhost:8000/api/product/${id}?_method=PUT`, formData, {
@@ -229,11 +245,15 @@ export default function ProductEdit() {
                 {/* Mô tả */}
                 <div>
                     <label className="block mb-1 font-medium">Mô tả</label>
-                    <textarea
-                        className="w-full border rounded px-3 py-2 h-24"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
+                    <textarea ref={contentRef} />
+
+                </div>
+
+                {/* Nội dung */}
+                <div>
+                    <label className="block mb-1 font-medium">Nội dung chi tiết</label>
+                    <textarea ref={descriptionRef} />
+
                 </div>
 
                 {/* Ảnh hiện tại */}
@@ -255,7 +275,7 @@ export default function ProductEdit() {
                         className="w-full border rounded px-3 py-2"
                         type="file"
                         accept="image/*"
-                        multiple
+                        // multiple
                         onChange={(e) => setNewImage(e.target.files[0])}
                     />
                 </div>

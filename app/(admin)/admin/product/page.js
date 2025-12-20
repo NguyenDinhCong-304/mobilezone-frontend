@@ -219,9 +219,9 @@ export default function ProductList() {
                                     )}
                                 </td>
                                 <td className="border p-2 space-x-4">
-                                    <button className="text-green-500">
+                                    <a href={`/admin/product/${p.id}`} className="text-green-500">
                                         <i className="fa-solid fa-eye"></i>
-                                    </button>
+                                    </a>
                                     <a href={`/admin/product/${p.id}/edit`} className="text-blue-600">
                                         <i className="fa fa-pencil"></i>
                                     </a>

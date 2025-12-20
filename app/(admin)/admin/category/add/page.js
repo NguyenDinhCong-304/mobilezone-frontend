@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
+import useSummernote from "../../_hooks/useSummernote";
 
 export default function CategoryAdd() {
     const [categories, setCategories] = useState([]);
@@ -13,6 +14,12 @@ export default function CategoryAdd() {
 
     const [image, setImage] = useState(null);
     const [status, setStatus] = useState(1);
+
+    const descriptionRef = useSummernote({
+        height: 300,
+        placeholder: "Mô tả danh mục...",
+        onChange: setDescription,
+    });
 
     useEffect(() => {
         fetch("http://localhost:8000/api/category")
@@ -115,11 +122,9 @@ export default function CategoryAdd() {
             <div className="mb-4 text-black">
                 <label className="block text-gray-700">Mô tả</label>
                 <textarea
+                    ref={descriptionRef}
                     name="description"
-                    placeholder="Mô tả"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="border p-2 col-span-2 w-full"
+                    className="w-full border rounded px-3 py-2"
                 />
             </div>
             <div className="mb-4">

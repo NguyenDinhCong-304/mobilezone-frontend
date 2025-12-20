@@ -16,11 +16,20 @@ export default function AdminLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         {/* Bootstrap CSS */}
-        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        {/* <link href="/assets/css/bootstrap.min.css" rel="stylesheet" /> */}
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
           rel="stylesheet"
         />
+
+        <script 
+          src="https://code.jquery.com/jquery-3.4.1.slim.min.js" 
+          integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" 
+          crossOrigin ="anonymous">
+        </script>
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
+
         <style>{`
           body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -172,7 +181,7 @@ export default function AdminLayout({ children }) {
         </footer>
 
         {/* Bootstrap Bundle */}
-        <Script src="/assets/js/bootstrap.bundle.min.js" strategy="afterInteractive" />
+        {/* <Script src="/assets/js/bootstrap.bundle.min.js" strategy="afterInteractive" /> */}
       </body>
     </html>
   );

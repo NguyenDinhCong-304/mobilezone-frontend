@@ -11,12 +11,12 @@ export default function ProductDetail() {
     const [quantity, setQuantity] = useState(1);
     const [related, setRelated] = useState([]);
 
-    // 🛒 Thêm vào giỏ hàng
+    // Thêm vào giỏ hàng
     const handleAddToCart = () => {
-        // 1️⃣ Lấy giỏ hàng hiện tại từ localStorage (nếu có)
+        // Lấy giỏ hàng hiện tại từ localStorage (nếu có)
         const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
 
-        // 2️⃣ Kiểm tra xem sản phẩm này đã có trong giỏ hàng chưa
+        // Kiểm tra xem sản phẩm này đã có trong giỏ hàng chưa
         const existingItem = existingCart.find((item) => item.id === product.id);
 
         if (existingItem) {

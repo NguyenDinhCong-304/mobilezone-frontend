@@ -3,6 +3,7 @@
 import "../globals.css";
 import Script from "next/script";
 import { useEffect, useState } from "react";
+import Navbar from "./_components/Navbar";
 
 // export const metadata = {
 //   title: "Website title - bootstrap alistyle html template",
@@ -160,7 +161,7 @@ export default function RootLayout({ children }) {
           </section>
 
           {/* Navbar */}
-          <nav className="navbar navbar-main navbar-expand pl-0 ml-38">
+          {/* <nav className="navbar navbar-main navbar-expand pl-0 ml-38">
             <ul className="navbar-nav flex-wrap">
               <li className="nav-item">
                 <a className="nav-link" href="/">Trang chủ</a>
@@ -179,10 +180,11 @@ export default function RootLayout({ children }) {
                 </div>
               </li>
               <li className="nav-item"><a className="nav-link" href="/sales">Khuyến mãi</a></li>
-              <li className="nav-item"><a className="nav-link" href="#">Bài viết</a></li>
+              <li className="nav-item"><a className="nav-link" href="/post">Bài viết</a></li>
               <li className="nav-item"><a className="nav-link" href="/contact">Liên hệ</a></li>
             </ul>
-          </nav>
+          </nav> */}
+          <Navbar />
         </header>
 
         {/* Nội dung trang */}

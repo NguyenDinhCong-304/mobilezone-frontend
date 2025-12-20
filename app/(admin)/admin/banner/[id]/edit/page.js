@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function BannerEdit() {
   const { id } = useParams();
@@ -30,7 +31,10 @@ export default function BannerEdit() {
         image: null,
       });
       setPreview(`http://localhost:8000/storage/${data.image}`);
-    });
+    })
+    .catch(() => {
+        toast.error("Không tải được dữ liệu banner!");
+      });
   }, [id]);
 
   const handleChange = (e) => {
@@ -61,11 +65,12 @@ export default function BannerEdit() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Cập nhật banner thành công!");
+      toast.success("Cập nhật banner thành công!");
       router.push("/admin/banner");
     } catch (err) {
-      console.error(err);
-      alert("Lỗi khi cập nhật banner!");
+      toast.error(
+        err.response?.data?.message || "Lỗi khi cập nhật banner!"
+      );
     }
   };
 
