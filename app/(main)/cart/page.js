@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {notify, confirmDialog} from "../../utils/notify"
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -29,19 +30,28 @@ export default function Cart() {
   };
 
   // Xóa sản phẩm
-  const removeItem = (id) => {
-    if (confirm("Bạn có chắc muốn xóa sản phẩm này không?")) {
-      const updated = cart.filter((item) => item.id !== id);
-      setCart(updated);
-      localStorage.setItem("cart", JSON.stringify(updated));
-    }
+  const removeItem = async (id) => {
+    const confirmed = await confirmDialog({
+    title: "Xóa sản phẩm?",
+    text: "Sản phẩm sẽ bị xóa khỏi giỏ hàng",
+    confirmText: "Xóa",
+    cancelText: "Hủy",
+  });
+
+  if (!confirmed) return;
+
+  const updated = cart.filter((item) => item.id !== id);
+  setCart(updated);
+  localStorage.setItem("cart", JSON.stringify(updated));
+
+  notify.success("Đã xóa sản phẩm khỏi giỏ hàng");
   };
 
   // Thanh toán
   const handleCheckout = () => {
     const user = localStorage.getItem("user");
     if (!user) {
-      alert("Vui lòng đăng nhập để tiếp tục thanh toán.");
+      notify.warning("Vui lòng đăng nhập để tiếp tục thanh toán.");
       router.push("/login");
     } else {
       router.push("/checkout");

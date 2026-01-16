@@ -1,10 +1,29 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import axios from "axios";
 
 export default function Navbar() {
+    const [menus, setMenus] = useState([]);
     const [openMobile, setOpenMobile] = useState(false);
     const [openProduct, setOpenProduct] = useState(false);
+    const [openSubMenu, setOpenSubMenu] = useState(null);
+
+    useEffect(() => {
+        const fetchMenus = async () => {
+            try {
+                const res = await axios.get(`http://localhost:8000/api/menu?type=${"main"}`, {
+                    params: { mode: "frontend" }
+                });
+                console.log("Menu API response:", res.data);
+                setMenus(res.data);
+            } catch (err) {
+                console.error("Lỗi tải menu:", err);
+            }
+        };
+
+        fetchMenus();
+    }, []);
 
     return (
         <nav className="relative">
@@ -31,56 +50,40 @@ export default function Navbar() {
 
                     {/* Desktop menu */}
                     <div className="hidden sm:flex sm:space-x-4">
-                        <Link href="/" className="rounded-md px-3 py-2 text-sm">
-                            Trang chủ
-                        </Link>
+                        {menus.map((menu) => (
+                            <div key={menu.id} className="relative group">
+                                <Link
+                                    href={menu.link}
+                                    className="inline-flex items-center rounded-md px-3 py-2 text-sm hover:bg-gray-800 hover:text-white"
+                                >
+                                    {menu.name}
+                                </Link>
 
-                        <div className="relative group">
-                            <Link
-                                href="/product"
-                                className="inline-flex items-center rounded-md px-3 py-2 text-sm text-gray-800 hover:text-white hover:bg-gray-800"
-                            >
-                                Sản phẩm
-                            </Link>
-
-                            <div className="absolute left-0 top-full z-50 hidden group-hover:block">
-                                <div className="mt-2 w-48 rounded-md bg-white shadow-lg py-1">
-                                    <Link href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                                        Điện thoại
-                                    </Link>
-                                    <Link href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                                        Máy tính bảng
-                                    </Link>
-                                    <Link href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                                        Laptop
-                                    </Link>
-                                    <Link href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                                        Đồng hồ thông minh
-                                    </Link>
-                                    <Link href="#" className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700">
-                                        Phụ kiện
-                                    </Link>
-                                </div>
+                                {/* Menu con */}
+                                {menu.children?.length > 0 && (
+                                    <div className="absolute left-0 top-full z-50 hidden group-hover:block">
+                                        <div className="mt-2 w-48 rounded-md bg-white shadow-lg py-1">
+                                            {menu.children.map((child) => (
+                                                <Link
+                                                    key={child.id}
+                                                    href={child.link}
+                                                    className="block px-4 py-2 text-sm hover:bg-gray-200"
+                                                >
+                                                    {child.name}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-
-                        <Link href="/sales" className="rounded-md px-3 py-2 text-sm text-gray-300 hover:text-white">
-                            Khuyến mãi
-                        </Link>
-
-                        <Link href="/post" className="rounded-md px-3 py-2 text-sm text-gray-300 hover:text-white">
-                            Bài viết
-                        </Link>
-
-                        <Link href="/contact" className="rounded-md px-3 py-2 text-sm text-gray-300 hover:text-white">
-                            Liên hệ
-                        </Link>
+                        ))}
                     </div>
+
                 </div>
             </div>
 
             {/* Mobile menu */}
-            {openMobile && (
+            {/* {openMobile && (
                 <div className="sm:hidden px-2 pt-2 pb-3 space-y-1">
                     <Link href="/" className="block rounded-md px-3 py-2 text-base bg-gray-700">
                         Trang chủ
@@ -128,7 +131,45 @@ export default function Navbar() {
                         Liên hệ
                     </Link>
                 </div>
+            )} */}
+            {openMobile && (
+                <div className="sm:hidden px-2 pt-2 pb-3 space-y-1 bg-gray-900 text-white">
+
+                    {menus.map((menu) => (
+                        <div key={menu.id}>
+                            {/* Menu cha */}
+                            <button
+                                onClick={() =>
+                                    setOpenSubMenu(openSubMenu === menu.id ? null : menu.id)
+                                }
+                                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-base hover:bg-gray-700"
+                            >
+                                <span>{menu.name}</span>
+                                {menu.children?.length > 0 && (
+                                    <span>{openSubMenu === menu.id ? "-" : "+"}</span>
+                                )}
+                            </button>
+
+                            {/* Menu con */}
+                            {openSubMenu === menu.id && menu.children?.length > 0 && (
+                                <div className="ml-4 space-y-1">
+                                    {menu.children.map((child) => (
+                                        <Link
+                                            key={child.id}
+                                            href={child.link}
+                                            className="block rounded-md px-3 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                                        >
+                                            {child.name}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+
+                </div>
             )}
+
         </nav>
     );
 }

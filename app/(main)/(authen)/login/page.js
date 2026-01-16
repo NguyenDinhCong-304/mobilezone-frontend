@@ -1,11 +1,19 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import { notify } from "@/app/utils/notify";
 
 export default function Login() {
+    const [mounted, setMounted] = useState(false);
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -17,11 +25,11 @@ export default function Login() {
             });
 
             if (res.data.status) {
-                // Lưu thông tin user vào localStorage
+                localStorage.setItem("token", res.data.token);
                 localStorage.setItem("user", JSON.stringify(res.data.user));
                 localStorage.setItem("role", res.data.role); // Lưu role để dùng sau
 
-                setMessage(res.data.message);
+                notify.success(res.data.message || "Đăng nhập thành công");
 
                 // Điều hướng dựa trên role
                 if (res.data.role === "admin") {
@@ -30,13 +38,13 @@ export default function Login() {
                     window.location.href = "/"; // Trang chủ người dùng
                 }
             } else {
-                setMessage(res.data.message);
+                notify.error(res.data.message || "Đăng nhập thất bại!");
             }
         } catch (err) {
             if (err.response && err.response.data) {
-                setMessage(err.response.data.message);
+                notify.error(err.response.data.message);
             } else {
-                setMessage("Lỗi kết nối máy chủ.");
+                notify.error("Lỗi kết nối máy chủ.");
             }
         }
     };

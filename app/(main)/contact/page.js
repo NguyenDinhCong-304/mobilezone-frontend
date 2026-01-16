@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { notify } from "../../utils/notify";
 
 const Contact = () => {
   const [form, setForm] = useState({
@@ -11,13 +12,9 @@ const Contact = () => {
     content: "",
   });
 
-  const [user, setUser] = useState(null);
-
-  const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
-  const [alertType, setAlertType] = useState("info"); // success | danger
 
-  // ✅ Tự động lấy thông tin user từ localStorage
+  // Tự động lấy thông tin user từ localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
@@ -38,24 +35,26 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
     setErrors({});
 
     try {
       const res = await axios.post("http://localhost:8000/api/contact", form);
-      setMessage(res.data.message || "Gửi liên hệ thành công!");
-      setAlertType("success");
-      setForm({ content: "" });
+
+      notify.success(res.data.message || "Gửi liên hệ thành công!");
+      setForm((prev) => ({
+        ...prev,
+        content: "",
+      }));
     } catch (error) {
       if (error.response?.status === 422) {
         setErrors(error.response.data.errors);
-        setAlertType("danger");
+        notify.warning("Vui lòng kiểm tra lại dữ liệu!");
       } else {
-        setMessage("Đã xảy ra lỗi. Vui lòng thử lại.");
-        setAlertType("danger");
+        notify.error("Đã xảy ra lỗi. Vui lòng thử lại.");
       }
     }
   };
+
 
   return (
     <div>
@@ -124,13 +123,6 @@ const Contact = () => {
             <div className="border p-3 rounded shadow-sm">
               <h4 className="fw-bold mb-3">Liên hệ với chúng tôi</h4>
               <p className="mb-3">Nếu bạn có thắc mắc gì, hãy gửi yêu cầu, chúng tôi sẽ phản hồi sớm nhất.</p>
-
-              {/* ✅ Alert message */}
-              {message && (
-                <div className={`alert alert-${alertType}`} role="alert">
-                  {message}
-                </div>
-              )}
 
               <form onSubmit={handleSubmit}>
                 <div className="form-group mb-3">

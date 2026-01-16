@@ -9,22 +9,42 @@ export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      alert("Vui lòng đăng nhập để xem lịch sử đặt hàng!");
+    try {
+      const storedUser = localStorage.getItem("user");
+
+      if (!storedUser) {
+        notify.warning("Vui lòng đăng nhập để xem lịch sử đặt hàng!");
+        router.push("/login");
+        return;
+      }
+
+      const userData = JSON.parse(storedUser);
+
+      if (!userData?.id) {
+        notify.error("Thông tin đăng nhập không hợp lệ!");
+        localStorage.removeItem("user");
+        router.push("/login");
+        return;
+      }
+
+      fetchOrders(userData.id);
+    } catch (err) {
+      console.error("Lỗi đọc user:", err);
+      notify.error("Phiên đăng nhập đã hết hạn!");
+      localStorage.removeItem("user");
       router.push("/login");
-      return;
     }
-    const userData = JSON.parse(storedUser);
-    fetchOrders(userData.id);
-  }, []);
+  }, [router]);
 
   const fetchOrders = async (id) => {
+    if (!id) return;
+
     try {
       const res = await axios.get(`http://localhost:8000/api/order/history/${id}`);
       setOrders(res.data);
     } catch (err) {
       console.error("Lỗi tải lịch sử:", err);
+      notify.error("Không thể tải lịch sử đơn hàng!");
     }
   };
 
@@ -41,13 +61,12 @@ export default function OrderHistory() {
             <div className="d-flex justify-content-between align-items-center mb-2">
               <h5>Đơn hàng #{order.id}</h5>
               <span
-                className={`badge ${
-                  order.status === "Đã hủy"
-                    ? "bg-danger"
-                    : order.status === "Đang giao"
+                className={`badge ${order.status === "Đã hủy"
+                  ? "bg-danger"
+                  : order.status === "Đang giao"
                     ? "bg-info"
                     : "bg-success"
-                }`}
+                  }`}
               >
                 {order.status}
               </span>

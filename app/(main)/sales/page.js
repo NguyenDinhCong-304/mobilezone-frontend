@@ -74,9 +74,8 @@ export default function Product() {
                     <div className="card mb-3">
                         <div className="card-body">
                             <ol className="breadcrumb float-left">
-                                <li className="breadcrumb-item"><a href="#">Home</a></li>
-                                <li className="breadcrumb-item"><a href="#">Category name</a></li>
-                                <li className="breadcrumb-item active">Item details</li>
+                                <li className="breadcrumb-item"><a href="#">Trang chủ</a></li>
+                                <li className="breadcrumb-item"><a href="#">Khuyến mãi</a></li>
                             </ol>
                         </div>
                     </div>

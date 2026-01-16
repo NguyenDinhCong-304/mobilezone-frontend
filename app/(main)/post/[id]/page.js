@@ -15,11 +15,11 @@ async function getPost(id) {
 
 async function getTopics() {
   const res = await fetch("http://localhost:8000/api/topic", {
-    cache: "force-cache",
+    cache: "no-store",
   });
 
   const json = await res.json();
-  return json.data ?? json;
+  return json.data;
 }
 
 export default async function PostDetail({ params, searchParams }) {

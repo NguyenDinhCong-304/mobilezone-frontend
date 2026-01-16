@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { notify } from "@/app/utils/notify";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -21,8 +22,10 @@ export default function Profile() {
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (!storedUser) {
-      alert("Vui lòng đăng nhập để xem thông tin tài khoản!");
-      window.location.href = "/login";
+      notify.warning("Vui lòng đăng nhập để xem thông tin tài khoản!");
+      wsetTimeout(() => {
+        window.location.href = "/login";
+      }, 1200);
       return;
     }
 
@@ -43,11 +46,11 @@ export default function Profile() {
       console.log(res.data.data);
       setOrders(res.data.data);
     } catch (err) {
-      console.error(err);
+      notify.error("Không thể tải danh sách đơn hàng!");
     }
   };
 
-  // ✅ Cập nhật thông tin cá nhân
+  // Cập nhật thông tin cá nhân
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     const form = new FormData();
@@ -59,40 +62,54 @@ export default function Profile() {
     }
 
     try {
-      const res = await axios.put(`http://localhost:8000/api/user/${user.id}`, form, {
+      const res = await axios.put(`http://localhost:8000/api/user/${user.id}`,
+        form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert(res.data.message);
+      notify.success(res.data.message || "Cập nhật thông tin thành công!");
       localStorage.setItem("user", JSON.stringify(res.data.user));
       setUser(res.data.user);
     } catch (err) {
-      alert("Lỗi khi cập nhật thông tin!");
+      notify.error("Lỗi khi cập nhật thông tin!");
     }
   };
 
 
-  // ✅ Đổi mật khẩu
+  // Đổi mật khẩu
   const handleChangePassword = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:8000/api/user/change-password/${user.id}`, passwordData);
-      alert(res.data.message);
-      setPasswordData({ current_password: "", new_password: "", new_password_confirmation: "" });
+      const res = await axios.post(
+        `http://localhost:8000/api/user/change-password/${user.id}`,
+        passwordData
+      );
+      notify.success(res.data.message || "Đổi mật khẩu thành công!");
+      setPasswordData({
+        current_password: "",
+        new_password: "",
+        new_password_confirmation: ""
+      });
     } catch (err) {
-      alert("Đổi mật khẩu thất bại!");
+      notify.error("Đổi mật khẩu thất bại!");
     }
   };
 
   // Hủy đơn hàng
   const handleCancelOrder = async (orderId) => {
-    if (!window.confirm("Bạn có chắc muốn hủy đơn hàng này?")) return;
+    const confirmed = await confirmDialog({
+      title: "Xác nhận hủy đơn",
+      text: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+      icon: "warning",
+    });
+
+    if (!confirmed) return;
 
     try {
       await axios.put(`http://localhost:8000/api/orders/${orderId}/cancel`);
-      alert("Đã hủy đơn hàng thành công!");
+      notify.success("Đã hủy đơn hàng thành công!");
       fetchOrders(user.id);
     } catch (err) {
-      alert("Không thể hủy đơn hàng!");
+      notify.error("Không thể hủy đơn hàng!");
     }
   };
 

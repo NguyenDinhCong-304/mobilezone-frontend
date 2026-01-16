@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { notify, confirmDialog } from "@/app/utils/notify";
 
 export default function Checkout() {
   const [cart, setCart] = useState([]);
@@ -36,7 +37,7 @@ export default function Checkout() {
     // Tính tổng tiền
     const totalAmount = savedCart.reduce(
       (sum, item) => sum + item.price * item.quantity,
-      0
+      0,
     );
     setTotal(totalAmount);
   }, []);
@@ -47,30 +48,58 @@ export default function Checkout() {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
+
     if (cart.length === 0) {
-      alert("Giỏ hàng của bạn đang trống!");
+      notify.warning("Giỏ hàng của bạn đang trống!");
       return;
     }
 
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      notify.error("Vui lòng đăng nhập để đặt hàng!");
+      return;
+    }
+
+    const confirmed = await confirmDialog({
+      title: "Xác nhận đặt hàng",
+      text: "Bạn có chắc chắn muốn đặt đơn hàng này không?",
+      icon: "question",
+    });
+
+    if (!confirmed) return;
+
     try {
-      const res = await axios.post("http://localhost:8000/api/order", {
-        user_id: user?.id,
-        email: user?.email,
-        cart_items: cart,
-        ...form,
-        total_price: total,
-      });
+      const res = await axios.post(
+        "http://localhost:8000/api/order",
+        {
+          cart_items: cart,
+          ...form,
+          total_price: total,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
       if (res.data.status) {
-        alert("Đặt hàng thành công! Vui lòng kiểm tra email xác nhận.");
+        notify.success(
+          "Đặt hàng thành công! Vui lòng kiểm tra email xác nhận.",
+        );
+
         localStorage.removeItem("cart");
-        window.location.href = "/";
+
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 3000);
       } else {
-        alert(res.data.message);
+        notify.error(res.data.message || "Đặt hàng thất bại!");
       }
     } catch (err) {
       console.error(err);
-      alert("Lỗi khi gửi đơn hàng!");
+      notify.error("Lỗi khi gửi đơn hàng, vui lòng thử lại!");
     }
   };
 
@@ -176,7 +205,9 @@ export default function Checkout() {
                       value={form.payment_method}
                       onChange={handleChange}
                     >
-                      <option value="cod">Thanh toán khi nhận hàng (COD)</option>
+                      <option value="cod">
+                        Thanh toán khi nhận hàng (COD)
+                      </option>
                       <option value="bank">Chuyển khoản ngân hàng</option>
                     </select>
                   </div>
