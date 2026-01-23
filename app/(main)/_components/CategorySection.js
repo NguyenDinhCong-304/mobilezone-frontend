@@ -9,15 +9,14 @@ export default function CategorySection({ title, catId, banner }) {
             try {
                 const res = await fetch(`http://localhost:8000/api/product-category/${catId}`);
                 const data = await res.json();
-                console.log(data); // in ra để kiểm tra
-                setProducts(data.data); // ✅ chỉ lấy mảng sản phẩm
+                console.log(data);
+                setProducts(data.data);
             } catch (err) {
                 console.error("Error fetching products:", err);
             }
         };
         fetchProducts();
     }, [catId]);
-
 
     return (
         <section className="padding-bottom">
@@ -63,16 +62,6 @@ export default function CategorySection({ title, catId, banner }) {
                                         <a href={`/product/${product.id}`} className="title text-truncate">
                                             {product.name.length > 20 ? product.name.substring(0, 20) + "..." : product.name}
                                         </a>
-
-                                        {/* {product.price_sale && (
-                                            <span className="badge badge-danger">
-                                                -
-                                                {Math.round(
-                                                    ((product.price_buy - product.price_sale) / product.price_buy) * 100
-                                                )}
-                                                %
-                                            </span>
-                                        )} */}
                                         <div className=" justify-center space-x-4">
                                             <div
                                                 className={`${product.price_sale ? "line-through text-gray-500" : ""
@@ -97,3 +86,4 @@ export default function CategorySection({ title, catId, banner }) {
         </section>
     );
 }
+

@@ -4,7 +4,7 @@ import Pagination from "../_components/Pagination";
 
 // SERVER FETCH
 async function getPosts({ topic, page = 1, perPage = 6 }) {
-  let url = `http://localhost:8000/api/post?page=${page}&per_page=${perPage}`;
+  let url = `http://localhost:8000/api/post?page=${page}&per_page=${perPage}&status=1`;
 
   if (topic) url += `&topic=${topic}`;
 
@@ -15,7 +15,7 @@ async function getPosts({ topic, page = 1, perPage = 6 }) {
 }
 
 async function getTopics() {
-  const res = await fetch("http://localhost:8000/api/topic", {
+  const res = await fetch("http://localhost:8000/api/topic?status=1", {
     cache: "force-cache",
   });
 

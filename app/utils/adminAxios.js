@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const adminAxios = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: "http://localhost:8000/api/admin",
 });
 
 adminAxios.interceptors.request.use((config) => {
@@ -13,5 +13,16 @@ adminAxios.interceptors.request.use((config) => {
 
   return config;
 });
+
+adminAxios.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("admin_token");
+      window.location.href = "/admin/login";
+    }
+    return Promise.reject(err);
+  }
+);
 
 export default adminAxios;

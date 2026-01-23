@@ -16,7 +16,7 @@ export default function ProductByCategory() {
   // load danh mục
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/category");
+      const res = await axios.get(`http://localhost:8000/api/category?status=1`);
       setCategories(res.data.data ?? []);
     } catch (error) {
       console.error("Lỗi khi load danh mục:", error);

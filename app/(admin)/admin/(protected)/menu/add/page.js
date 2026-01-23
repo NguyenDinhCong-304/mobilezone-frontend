@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { notify, confirmDialog } from "../../../../utils/notify";
+import { notify, confirmDialog } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function AddMenu() {
   const router = useRouter();
@@ -18,8 +19,8 @@ export default function AddMenu() {
 
   //Lấy danh sách menu cha
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/api/menu")
+    adminAxios
+      .get("/menu")
       .then((res) => {
         setMenus(Array.isArray(res.data.data) ? res.data.data : []);
       })
@@ -35,7 +36,7 @@ export default function AddMenu() {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:8000/api/menu", {
+      await adminAxios.post("/menu", {
         name,
         link,
         type,
@@ -67,7 +68,7 @@ export default function AddMenu() {
 
     if (!ok) return;
     try {
-      await axios.post(`http://localhost:8000/api/menu/import`, {
+      await adminAxios.post(`/menu/import`, {
         type: sourceType,
       });
       notify.success(`Đã thêm menu từ ${sourceType} thành công!`);

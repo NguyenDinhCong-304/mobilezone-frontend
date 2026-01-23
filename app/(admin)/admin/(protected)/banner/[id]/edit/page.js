@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { confirmDialog } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function BannerEdit() {
   const { id } = useParams();
@@ -19,7 +20,7 @@ export default function BannerEdit() {
   const [preview, setPreview] = useState("");
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/api/banner/${id}`).then((res) => {
+    adminAxios.get(`/banner/${id}`).then((res) => {
       const data = res.data;
       setForm({
         name: data.name || "",
@@ -71,13 +72,7 @@ export default function BannerEdit() {
         }
       }
 
-      await axios.post(
-        `http://localhost:8000/api/banner/${id}?_method=PUT`,
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      await adminAxios.post(`/banner/${id}?_method=PUT`, formData);
 
       toast.success("Cập nhật banner thành công!");
       router.push("/admin/banner");

@@ -3,6 +3,8 @@ import { useState } from "react";
 import axios from "axios";
 import slugify from "slugify";
 import { useRouter } from "next/navigation";
+import adminAxios from "@/app/utils/adminAxios";
+import { notify } from "@/app/utils/notify";
 
 export default function AddTopic() {
   const router = useRouter();
@@ -21,7 +23,7 @@ export default function AddTopic() {
     setLoading(true);
 
     try {
-      await axios.post("http://localhost:8000/api/topic", {
+      await adminAxios.post("/topic", {
         name,
         slug: slug || slugify(name, { lower: true }),
         sort_order: sortOrder,
@@ -29,7 +31,7 @@ export default function AddTopic() {
         status,
       });
 
-      alert("Thêm chủ đề thành công!");
+      notify.success("Thêm chủ đề thành công!");
       router.push("/admin/topic");
     } catch (err) {
       console.error(err);

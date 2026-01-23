@@ -6,59 +6,105 @@ import { useRouter } from "next/navigation";
 import { notify } from "../../../utils/notify";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
+    setLoading(true);
 
     try {
       const res = await axios.post("http://localhost:8000/api/login", {
-        login: email,
+        login: login.trim(),
         password,
       });
 
-      if (res.data.role !== "admin") {
-        notify.error("Bạn không có quyền admin");
+      const { token, role, user } = res.data;
+
+      if (!token || !role) {
+        notify.error("Dữ liệu đăng nhập không hợp lệ");
+        setLoading(false);
         return;
       }
 
-      // lưu admin riêng
-      localStorage.setItem("admin_token", res.data.token);
-      localStorage.setItem("admin_role", JSON.stringify(res.data.role));
-      localStorage.setItem("admin_user", JSON.stringify(res.data.user));
+      // CHUẨN HÓA ROLE
+      let isAdmin = false;
+
+      if (typeof role === "string") {
+        isAdmin = role === "admin";
+      } else if (Array.isArray(role)) {
+        isAdmin = role.includes("admin");
+      } else if (typeof role === "object") {
+        isAdmin = role?.name === "admin";
+      }
+
+      if (!isAdmin) {
+        notify.error("Bạn không có quyền admin");
+        setLoading(false);
+        return;
+      }
+
+      // LƯU ADMIN RIÊNG
+      localStorage.setItem("admin_token", token);
+      localStorage.setItem("admin_role", JSON.stringify(role));
+      localStorage.setItem("admin_user", JSON.stringify(user));
 
       notify.success("Đăng nhập admin thành công");
-      router.push("/admin");
+      router.replace("/admin");
     } catch (err) {
-      notify.error("Đăng nhập thất bại");
+      console.error("Admin login error:", err);
+      const msg =
+        err.response?.data?.message || "Sai tài khoản hoặc mật khẩu";
+      notify.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded shadow w-96">
-        <h2 className=" text-black text-xl font-bold mb-4 text-center">ADMIN LOGIN</h2>
+      <form
+        onSubmit={handleLogin}
+        className="bg-white p-6 rounded shadow w-96"
+      >
+        <h2 className="text-black text-xl font-bold mb-4 text-center">
+          ADMIN LOGIN
+        </h2>
 
         <input
-          type="email"
-          placeholder="Email"
+          type="text"
+          placeholder="Email / Username / Phone"
           className="text-black w-full border p-2 mb-3"
-          onChange={(e) => setEmail(e.target.value)}
+          value={login}
+          onChange={(e) => setLogin(e.target.value)}
+          required
         />
 
         <input
           type="password"
           placeholder="Password"
           className="text-black w-full border p-2 mb-3"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
 
-        <button className="w-full bg-blue-600 text-white py-2 rounded">
-          Đăng nhập
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full py-2 rounded text-white ${
+            loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+        >
+          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
       </form>
     </div>
   );
 }
+
+

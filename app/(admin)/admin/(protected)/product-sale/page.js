@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import ProductSelector from "../_component/ProductSelector";
+import ProductSelector from "../../_component/ProductSelector";
 import { confirmDialog, notify } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function ProductSaleList() {
   const [isClient, setIsClient] = useState(false);
@@ -28,7 +29,7 @@ export default function ProductSaleList() {
 
   // Gọi API danh sách khuyến mãi
   const fetchSales = async () => {
-    const res = await axios.get("http://localhost:8000/api/productsale", {
+    const res = await adminAxios.get("/productsale", {
       params: { search: searchText, status, page },
     });
     setSales(res.data.data);
@@ -37,7 +38,7 @@ export default function ProductSaleList() {
 
   // Lấy danh sách sản phẩm cho dropdown
   const fetchProducts = async () => {
-    const res = await axios.get("http://localhost:8000/api/product", {
+    const res = await adminAxios.get("/product", {
       params: { per_page: 100 },
     });
     setProducts(res.data.data || res.data);
@@ -63,9 +64,10 @@ export default function ProductSaleList() {
     formData.append("file", file);
 
     try {
-      await axios.post("http://localhost:8000/api/productsale/import", formData, {
+      await adminAxios.post("/productsale/import", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
       notify.success("Import thành công!");
       fetchSales();
     } catch (err) {
@@ -89,7 +91,7 @@ export default function ProductSaleList() {
         product_id: selectedProduct.value, // Lấy ID từ ProductSelector
       };
 
-      await axios.post("http://localhost:8000/api/productsale", payload);
+      await adminAxios.post("/productsale", payload);
       notify.success("Thêm khuyến mãi thành công!");
 
       // Reset form sau khi thêm
@@ -118,7 +120,6 @@ export default function ProductSaleList() {
     }
   };
 
-
   //Xóa khuyến mãi
   const handleDelete = async (id) => {
     const confirmed = await confirmDialog({
@@ -131,7 +132,8 @@ export default function ProductSaleList() {
     if (!confirmed) return;
 
     try {
-      const res = await axios.delete(`http://localhost:8000/api/productsale/${id}`);
+      const res = await adminAxios.delete(`/productsale/${id}`);
+
       notify.success(res.data.message || "Xóa thành công!");
       // Gọi lại API để load lại danh sách
       fetchSales();
@@ -146,7 +148,9 @@ export default function ProductSaleList() {
 
   return (
     <div className="p-6 text-black">
-      <h2 className="text-3xl font-bold mb-6 border-b">Quản lý khuyến mãi sản phẩm</h2>
+      <h2 className="text-3xl font-bold mb-6 border-b">
+        Quản lý khuyến mãi sản phẩm
+      </h2>
       {/* FORM THÊM MỚI */}
       <div className="bg-gray-100 p-4 rounded-lg mb-6">
         <h3 className="text-xl font-semibold mb-3">Thêm khuyến mãi</h3>
@@ -168,7 +172,6 @@ export default function ProductSaleList() {
               setForm({ ...form, product_id: option ? option.value : "" });
             }}
           />
-
 
           <input
             type="number"
@@ -222,7 +225,6 @@ export default function ProductSaleList() {
             <i className="fa-solid fa-download"></i> Tải xuống file mẫu
           </a>
         </div>
-
 
         {/* IMPORT FILE */}
         <div className="flex gap-3 mb-6 mt-6">
@@ -309,7 +311,10 @@ export default function ProductSaleList() {
                   {/* <button className="text-green-500">
                     <i className="fa-solid fa-eye"></i>
                   </button> */}
-                  <a href={`/admin/product-sale/${s.id}/edit`} className="text-blue-600">
+                  <a
+                    href={`/admin/product-sale/${s.id}/edit`}
+                    className="text-blue-600"
+                  >
                     <i className="fa fa-pencil"></i>
                   </a>
                   <button
@@ -339,7 +344,9 @@ export default function ProductSaleList() {
         >
           Prev
         </button>
-        <span>{page} / {lastPage}</span>
+        <span>
+          {page} / {lastPage}
+        </span>
         <button
           disabled={page === lastPage}
           onClick={() => setPage(page + 1)}

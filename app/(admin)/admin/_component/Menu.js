@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import adminAxios from "@/app/utils/adminAxios";
 import axios from "axios";
 
 const Menu = ({ icon, title, basePaths = [], children }) => {
@@ -40,11 +41,9 @@ export default function AdminSidebar() {
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        const token = localStorage.getItem("admin_token");
-
-        const res = await axios.get("http://localhost:8000/api/me", {
+        const res = await axios.get("http://localhost:8000/api/admin/me", {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
           },
         });
 

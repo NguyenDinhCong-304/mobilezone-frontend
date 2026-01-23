@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function EditCategory() {
   const { id } = useParams();
@@ -22,10 +23,13 @@ export default function EditCategory() {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/category/${id}`);
-        if (!res.ok) throw new Error("Không tìm thấy danh mục");
-        const json = await res.json();
-        const cat = json.data ?? json;
+        const res = await adminAxios.get(`/category/${id}`);
+        const cat = res.data;
+
+        if (!cat) {
+          toast.error("Không tìm thấy danh mục");
+          return;
+        }
 
         setName(cat.name || "");
         setSlug(cat.slug || "");
@@ -46,10 +50,17 @@ export default function EditCategory() {
 
   // Lấy danh sách categories để chọn parent
   useEffect(() => {
-    fetch("http://localhost:8000/api/category")
-      .then((res) => res.json())
-      .then((data) => setCategories(data.data))
-      .catch((err) => console.error("Error:", err));
+    const fetchCategories = async () => {
+      try {
+        const res = await adminAxios.get("/category");
+        console.log("CATEGORY API:", res.data);
+        setCategories(res.data.data);
+      } catch (err) {
+        console.error("Lỗi tải danh mục:", err);
+      }
+    };
+
+    fetchCategories();
   }, []);
 
   // Submit update
@@ -70,27 +81,21 @@ export default function EditCategory() {
     }
 
     try {
-      const res = await fetch(`http://localhost:8000/api/category/${id}`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await adminAxios.post(`/category/${id}`, formData);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (res.status === 422 && data.errors) {
-          const firstError = Object.values(data.errors)[0][0];
-          toast.warning(firstError);
-          return;
-        }
-        throw new Error(data.message || "Cập nhật danh mục thất bại!");
-      }
-
-      toast.success("Cập nhật danh mục thành công");
+      toast.success(res.data.message || "Cập nhật danh mục thành công!");
       router.push("/admin/category");
     } catch (err) {
       console.error("Lỗi cập nhật:", err);
-      toast.error(err.message || "Đã xảy ra lỗi, vui lòng thử lại!");
+
+      if (err.response?.status === 422) {
+        const firstError = Object.values(err.response.data.errors)[0][0];
+        toast.warning(firstError);
+      } else {
+        toast.error(
+          err.response?.data?.message || "Cập nhật danh mục thất bại!",
+        );
+      }
     }
   };
 
@@ -142,11 +147,15 @@ export default function EditCategory() {
             className="border px-3 py-2 w-full rounded"
           >
             <option value="0">-- Không có --</option>
-            {categories.map((item) => (
-              <option key={item.id} value={String(item.id)}>
-                {item.name}
-              </option>
-            ))}
+            {Array.isArray(categories) &&
+              categories
+                .filter(Boolean) // loại bỏ undefined / null
+                .filter((item) => item.id !== Number(id))
+                .map((item) => (
+                  <option key={item.id} value={String(item.id)}>
+                    {item.name}
+                  </option>
+                ))}
           </select>
         </div>
 

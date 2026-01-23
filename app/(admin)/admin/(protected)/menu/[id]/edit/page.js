@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function EditMenu() {
     const router = useRouter();
@@ -26,7 +27,7 @@ export default function EditMenu() {
         if (!id) return;
         const fetchMenu = async () => {
             try {
-                const res = await axios.get(`http://localhost:8000/api/menu/${id}`);
+                const res = await adminAxios.get(`menu/${id}`);
                 const data = res.data.data;
                 console.log("Menu data:", data);
                 setMenu(data);
@@ -52,8 +53,8 @@ export default function EditMenu() {
 
     // Lấy danh sách menu cha
     useEffect(() => {
-        axios
-            .get("http://localhost:8000/api/menu")
+        adminAxios
+            .get("/menu")
             .then((res) => setMenus(res.data.data))
             .catch((err) => console.error("Lỗi khi tải danh sách menu cha:", err));
     }, []);
@@ -64,7 +65,7 @@ export default function EditMenu() {
         setLoading(true);
 
         try {
-            const res = await axios.put(`http://localhost:8000/api/menu/${id}`, {
+            const res = await adminAxios.put(`menu/${id}`, {
                 name,
                 link,
                 type: type.trim().toLowerCase(),

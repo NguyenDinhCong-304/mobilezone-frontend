@@ -1,11 +1,10 @@
 import PostTopicMenu from "../../_components/PostTopicMenu";
-import PostContent from "../../_components/PostContent";
+import HtmlContent from "../../_components/HtmlContent";
 
 async function getPost(id) {
-  const res = await fetch(
-    `http://localhost:8000/api/post/${id}`,
-    { cache: "no-store" }
-  );
+  const res = await fetch(`http://localhost:8000/api/post/${id}`, {
+    cache: "no-store",
+  });
 
   if (!res.ok) throw new Error("Post not found");
 
@@ -14,22 +13,26 @@ async function getPost(id) {
 }
 
 async function getTopics() {
-  const res = await fetch("http://localhost:8000/api/topic", {
+  const res = await fetch("http://localhost:8000/api/topic?status=1", {
     cache: "no-store",
   });
 
-  const json = await res.json();
-  return json.data;
+  const text = await res.text();
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch topics");
+  }
+
+  return JSON.parse(text).data;
 }
 
 export default async function PostDetail({ params, searchParams }) {
   const { id } = params;
-  const activeTopic = searchParams?.topic || null;
 
-  const [post, topics] = await Promise.all([
-    getPost(id),
-    getTopics(),
-  ]);
+  const sp = await searchParams;
+  const activeTopic = sp?.topic || null;
+
+  const [post, topics] = await Promise.all([getPost(id), getTopics()]);
 
   return (
     <section className="section-content padding-y">
@@ -42,11 +45,9 @@ export default async function PostDetail({ params, searchParams }) {
           <div className="col-md-9">
             <h1 className="mb-3">{post.title}</h1>
 
-            <div className="text-muted mb-4">
-              Ngày đăng: {post.created_at}
-            </div>
+            <div className="text-muted mb-4">Ngày đăng: {post.created_at}</div>
 
-            <PostContent html={post.content} />
+            <HtmlContent html={post.content} className="content" />
           </div>
         </div>
       </div>

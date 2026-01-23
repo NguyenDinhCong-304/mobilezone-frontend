@@ -1,0 +1,82 @@
+
+
+/* ADMIN ROOT */
+.admin-root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f4f4;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.admin-root .header {
+  background: #ffcc5c;
+  padding: 10px 20px;
+}
+
+.admin-root .header .logo {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+/* SIDEBAR */
+.admin-root .sidebar {
+  width: 220px;
+  background: #2c3e50;
+  min-height: 100vh;
+  color: #fff;
+}
+
+.admin-root .sidebar .profile {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.admin-root .sidebar .profile img {
+  border-radius: 50%;
+}
+
+.admin-root .sidebar .nav-link {
+  color: #ddd;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-root .sidebar .nav-link:hover,
+.admin-root .sidebar .nav-link.active {
+  background: #1a252f;
+  color: #fff;
+}
+
+/* MAIN */
+.admin-root main {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+/* FOOTER */
+.admin-root .site-footer {
+  background: #2c3e50;
+  color: #fff;
+  padding: 10px;
+  text-align: center;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose table {
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

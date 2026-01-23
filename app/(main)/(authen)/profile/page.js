@@ -2,9 +2,14 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { notify } from "@/app/utils/notify";
+import UpdateProfile from "../../_components/UpdateProfile";
+import ChangePassword from "../../_components/ChangePassword";
+import MyOrders from "../../_components/MyOrders";
+import { confirmDialog } from "@/app/utils/notify";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState("overview");
   const [orders, setOrders] = useState([]);
   const [avatar, setAvatar] = useState(null);
   const [formData, setFormData] = useState({
@@ -23,7 +28,7 @@ export default function Profile() {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (!storedUser) {
       notify.warning("Vui lòng đăng nhập để xem thông tin tài khoản!");
-      wsetTimeout(() => {
+      setTimeout(() => {
         window.location.href = "/login";
       }, 1200);
       return;
@@ -41,8 +46,17 @@ export default function Profile() {
 
   // Lấy danh sách đơn hàng
   const fetchOrders = async (userId) => {
+    const token = localStorage.getItem("token");
+
     try {
-      const res = await axios.get(`http://localhost:8000/api/orders/user/${userId}`);
+      const res = await axios.get(
+        `http://localhost:8000/api/orders/user/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       console.log(res.data.data);
       setOrders(res.data.data);
     } catch (err) {
@@ -53,49 +67,86 @@ export default function Profile() {
   // Cập nhật thông tin cá nhân
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+
+    const token = localStorage.getItem("token");
+
     const form = new FormData();
+    form.append("_method", "PUT"); // 🔑 QUAN TRỌNG
     form.append("name", formData.name);
     form.append("phone", formData.phone);
     form.append("email", formData.email);
+
     if (avatar) {
-      form.append("avatar", avatar); // nếu có ảnh mới
+      form.append("avatar", avatar);
     }
 
     try {
-      const res = await axios.put(`http://localhost:8000/api/user/${user.id}`,
-        form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(
+        `http://localhost:8000/api/user/${user.id}`,
+        form,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
       notify.success(res.data.message || "Cập nhật thông tin thành công!");
-      localStorage.setItem("user", JSON.stringify(res.data.user));
-      setUser(res.data.user);
+
+      const oldUser = JSON.parse(localStorage.getItem("user")) || {};
+      const mergedUser = { ...oldUser, ...(res.data.user || {}) };
+
+      localStorage.setItem("user", JSON.stringify(mergedUser));
+      setUser(mergedUser);
     } catch (err) {
+      console.error(err.response?.data);
       notify.error("Lỗi khi cập nhật thông tin!");
     }
   };
 
-
   // Đổi mật khẩu
   const handleChangePassword = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      notify.error("Bạn chưa đăng nhập!");
+      return;
+    }
     try {
       const res = await axios.post(
         `http://localhost:8000/api/user/change-password/${user.id}`,
-        passwordData
+        passwordData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
       notify.success(res.data.message || "Đổi mật khẩu thành công!");
       setPasswordData({
         current_password: "",
         new_password: "",
-        new_password_confirmation: ""
+        new_password_confirmation: "",
       });
+      setActiveTab("overview");
     } catch (err) {
-      notify.error("Đổi mật khẩu thất bại!");
+      if (err.response?.data?.message) {
+        notify.error(err.response.data.message);
+      } else {
+        notify.error("Đổi mật khẩu thất bại!");
+      }
     }
   };
 
   // Hủy đơn hàng
   const handleCancelOrder = async (orderId) => {
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      notify.error("Bạn chưa đăng nhập!");
+      return;
+    }
     const confirmed = await confirmDialog({
       title: "Xác nhận hủy đơn",
       text: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
@@ -105,7 +156,16 @@ export default function Profile() {
     if (!confirmed) return;
 
     try {
-      await axios.put(`http://localhost:8000/api/orders/${orderId}/cancel`);
+      await axios.put(
+        `http://localhost:8000/api/orders/${orderId}/cancel`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
       notify.success("Đã hủy đơn hàng thành công!");
       fetchOrders(user.id);
     } catch (err) {
@@ -129,11 +189,32 @@ export default function Profile() {
             {/* Sidebar */}
             <aside className="col-md-3">
               <nav className="list-group">
-                <a className="list-group-item active">Tổng quan</a>
-                <a className="list-group-item">Cập nhật thông tin</a>
-                <a className="list-group-item">Đổi mật khẩu</a>
-                <a className="list-group-item">Đơn hàng của tôi</a>
-                <a
+                <button
+                  className={`list-group-item ${activeTab === "overview" ? "active" : ""}`}
+                  onClick={() => setActiveTab("overview")}
+                >
+                  Tổng quan
+                </button>
+                <button
+                  className={`list-group-item ${activeTab === "profile" ? "active" : ""}`}
+                  onClick={() => setActiveTab("profile")}
+                >
+                  Cập nhật thông tin
+                </button>
+                <button
+                  className={`list-group-item ${activeTab === "password" ? "active" : ""}`}
+                  onClick={() => setActiveTab("password")}
+                >
+                  Đổi mật khẩu
+                </button>
+                <button
+                  className={`list-group-item ${activeTab === "orders" ? "active" : ""}`}
+                  onClick={() => setActiveTab("orders")}
+                >
+                  Đơn hàng
+                </button>
+
+                <button
                   className="list-group-item text-danger"
                   onClick={() => {
                     localStorage.removeItem("user");
@@ -141,155 +222,77 @@ export default function Profile() {
                   }}
                 >
                   Đăng xuất
-                </a>
+                </button>
               </nav>
             </aside>
 
             {/* Main content */}
             <main className="col-md-9">
-              <article className="card mb-4">
-                <div className="card-body text-center">
-                  <img
-                    src={`http://localhost:8000/${user.avatar}`}
-                    className="rounded-circle img-sm border mb-2"
-                    alt="avatar"
-                    width="120"
-                    height="120"
-                  />
-                  <div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setAvatar(e.target.files[0])}
+              {activeTab === "overview" && (
+                <div className="card p-4">
+                  <div className="d-flex align-items-center gap-4">
+                    {/* Avatar */}
+                    <img
+                      src={
+                        user.avatar
+                          ? `http://localhost:8000/${user.avatar}`
+                          : "/images/default-avatar.png"
+                      }
+                      className="rounded-circle border"
+                      width="120"
+                      height="120"
+                      alt="Avatar"
                     />
 
+                    {/* Thông tin */}
+                    <div>
+                      <h4 className="mb-1">{user.name}</h4>
+                      <p className="mb-1 text-muted">
+                        <i className="fa fa-envelope me-2"></i>
+                        {user.email}
+                      </p>
+                      <p className="mb-0 text-muted">
+                        <i className="fa fa-phone me-2"></i>
+                        {user.phone || "Chưa cập nhật"}
+                      </p>
+                    </div>
                   </div>
-                  <h4 className="mt-2">{user.name}</h4>
-                  <p>{user.email}</p>
-                </div>
-              </article>
 
-              {/* Form cập nhật thông tin */}
-              <article className="card mb-4">
-                <div className="card-body">
-                  <h5 className="mb-3">Cập nhật thông tin cá nhân</h5>
-                  <form onSubmit={handleUpdateProfile}>
-                    <div className="form-group">
-                      <label>Họ và tên</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Số điện thoại</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Email</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-primary mt-2">
-                      Cập nhật
+                  <hr />
+
+                  <div className="text-end">
+                    <button
+                      className="btn btn-outline-primary btn-sm"
+                      onClick={() => setActiveTab("profile")}
+                    >
+                      Cập nhật thông tin
                     </button>
-                  </form>
+                  </div>
                 </div>
-              </article>
+              )}
 
-              {/* Form đổi mật khẩu */}
-              <article className="card mb-4">
-                <div className="card-body">
-                  <h5 className="mb-3">Đổi mật khẩu</h5>
-                  <form onSubmit={handleChangePassword}>
-                    <div className="form-group">
-                      <label>Mật khẩu hiện tại</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={passwordData.current_password}
-                        onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Mật khẩu mới</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={passwordData.new_password}
-                        onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Xác nhận mật khẩu mới</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        value={passwordData.new_password_confirmation}
-                        onChange={(e) =>
-                          setPasswordData({ ...passwordData, new_password_confirmation: e.target.value })
-                        }
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-warning mt-2">
-                      Đổi mật khẩu
-                    </button>
-                  </form>
-                </div>
-              </article>
+              {activeTab === "profile" && (
+                <UpdateProfile
+                  user={user}
+                  formData={formData}
+                  setFormData={setFormData}
+                  avatar={avatar}
+                  setAvatar={setAvatar}
+                  onSubmit={handleUpdateProfile}
+                />
+              )}
 
-              {/* Danh sách đơn hàng */}
-              <article className="card">
-                <div className="card-body">
-                  <h5 className="mb-3">Đơn hàng của tôi</h5>
-                  {orders.length === 0 ? (
-                    <p>Chưa có đơn hàng nào.</p>
-                  ) : (
-                    <table className="table table-bordered">
-                      <thead>
-                        <tr>
-                          <th>Mã đơn</th>
-                          <th>Ngày đặt</th>
-                          <th>Tổng tiền</th>
-                          <th>Trạng thái</th>
-                          <th>Thao tác</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {orders.map((order) => (
-                          <tr key={order.id}>
-                            <td>{order.id}</td>
-                            <td>{new Date(order.created_at).toLocaleString("vi-VN")}</td>
-                            <td>{order.total.toLocaleString("vi-VN")}₫</td>
-                            <td>{order.status}</td>
-                            <td>
-                              {order.status === "chưa xác thực" && (
-                                <button
-                                  className="btn btn-danger btn-sm"
-                                  onClick={() => handleCancelOrder(order.id)}
-                                >
-                                  Hủy đơn
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </article>
+              {activeTab === "password" && (
+                <ChangePassword
+                  passwordData={passwordData}
+                  setPasswordData={setPasswordData}
+                  onSubmit={handleChangePassword}
+                />
+              )}
+
+              {activeTab === "orders" && (
+                <MyOrders orders={orders} onCancel={handleCancelOrder} />
+              )}
             </main>
           </div>
         </div>

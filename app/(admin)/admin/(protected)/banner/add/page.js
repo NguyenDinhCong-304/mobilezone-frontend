@@ -3,7 +3,8 @@ import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { confirmDialog } from "../../../../utils/notify";
+import { confirmDialog } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function BannerAdd() {
   const router = useRouter();
@@ -45,13 +46,12 @@ export default function BannerAdd() {
 
     try {
       const formData = new FormData();
+
       for (const key in form) {
         formData.append(key, form[key]);
       }
 
-      await axios.post("http://localhost:8000/api/banner", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await adminAxios.post("/banner", formData,);
 
       toast.success("Thêm banner thành công!");
       router.push("/admin/banner");

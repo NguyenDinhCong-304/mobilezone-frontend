@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import slugify from "slugify";
-import { notify } from "../../../../../utils/notify";
+import { notify } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function EditPost() {
     const { id } = useParams();
@@ -27,7 +28,7 @@ export default function EditPost() {
     useEffect(() => {
         const fetchTopics = async () => {
             try {
-                const res = await axios.get("http://localhost:8000/api/topic");
+                const res = await adminAxios.get("/topic");
                 console.log("API topic response:", res.data);
                 const topicsData = Array.isArray(res.data.data)
                     ? res.data.data
@@ -48,7 +49,7 @@ export default function EditPost() {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const res = await axios.get(`http://localhost:8000/api/post/${id}`);
+                const res = await adminAxios.get(`/post/${id}`);
                 const data = res.data.data; //Backend trả về { data: {...} }
 
                 setPostTitle(data.title);
@@ -94,7 +95,7 @@ export default function EditPost() {
 
             if (newImage) formData.append("image", newImage);
 
-            await axios.post(`http://localhost:8000/api/post/${id}?_method=PUT`, formData, {
+            await adminAxios.post(`/post/${id}?_method=PUT`, formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 

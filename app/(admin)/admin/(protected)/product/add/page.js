@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import slugify from "slugify";
-import axios from "axios";
+import adminAxios from "@/app/utils/adminAxios";
 import { useRouter } from "next/navigation";
-import useSummernote from "../../_hooks/useSummernote";
-import { notify } from "../../../../utils/notify";
+import useSummernote from "../../../_hooks/useSummernote";
+import { notify } from "../../../../../utils/notify";
 
 export default function ProductAdd() {
   const router = useRouter();
@@ -35,16 +35,30 @@ export default function ProductAdd() {
     onChange: setContent,
   });
 
-  const descriptionRef = useSummernote({
-    height: 300,
-    placeholder: "Nội dung chi tiết sản phẩm...",
-    onChange: setDescription,
-  });
+  // const descriptionRef = useSummernote({
+  //   height: 300,
+  //   placeholder: "Nội dung chi tiết sản phẩm...",
+  //   onChange: setDescription,
+  // });
 
   useEffect(() => {
-    axios.get("http://localhost:8000/api/category").then((res) => setCategories(res.data.data));
-    axios.get("http://localhost:8000/api/brand").then((res) => setBrands(res.data.data));
-    axios.get("http://localhost:8000/api/attribute").then((res) => setAttributes(res.data));
+    const fetchInitData = async () => {
+      try {
+        const [catRes, brandRes, attrRes] = await Promise.all([
+          adminAxios.get("/category"),
+          adminAxios.get("/brand"),
+          adminAxios.get("/attribute"),
+        ]);
+
+        setCategories(catRes.data.data);
+        setBrands(brandRes.data.data);
+        setAttributes(attrRes.data.data || attrRes.data);
+      } catch (error) {
+        console.error("Lỗi tải dữ liệu khởi tạo:", error);
+      }
+    };
+
+    fetchInitData();
   }, []);
 
   const addProductAttribute = () => {
@@ -52,7 +66,12 @@ export default function ProductAdd() {
     const attr = attributes.find((a) => a.id == selectedAttr);
     setProductAttrs([
       ...productAttrs,
-      { id: Date.now(), attribute_id: attr.id, attribute_name: attr.name, value },
+      {
+        id: Date.now(),
+        attribute_id: attr.id,
+        attribute_name: attr.name,
+        value,
+      },
     ]);
     setValue("");
   };
@@ -63,11 +82,13 @@ export default function ProductAdd() {
 
   const addNewAttribute = async () => {
     if (!newAttr.trim()) return;
+
     try {
-      const res = await axios.post("http://localhost:8000/api/attribute", {
+      const res = await adminAxios.post("/attribute", {
         name: newAttr,
       });
-      setAttributes([...attributes, res.data]);
+
+      setAttributes((prev) => [...prev, res.data.data || res.data]);
       setNewAttr("");
       setShowAttrForm(false);
     } catch (error) {
@@ -100,20 +121,16 @@ export default function ProductAdd() {
     });
 
     try {
-      const res = await axios.post("http://localhost:8000/api/product", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      console.log("Thêm sản phẩm thành công:", res.data);
+      const res = await adminAxios.post("/product", formData);
       notify.success(res.data?.message || "Thêm sản phẩm thành công!");
       router.push("/admin/product");
     } catch (error) {
       console.error("Lỗi khi thêm sản phẩm:", error.response?.data || error);
       notify.error(
-        error.response?.data?.message || "Có lỗi xảy ra khi thêm sản phẩm!"
+        error.response?.data?.message || "Có lỗi xảy ra khi thêm sản phẩm!",
       );
     }
   };
-
 
   return (
     <div className="p-6 bg-white shadow rounded text-black">
@@ -344,7 +361,9 @@ export default function ProductAdd() {
 
           {/* Upload nhiều ảnh */}
           <div>
-            <label className="block mb-1 font-medium">Ảnh sản phẩm (chọn nhiều)</label>
+            <label className="block mb-1 font-medium">
+              Ảnh sản phẩm (chọn nhiều)
+            </label>
             <input
               type="file"
               className="w-full border rounded px-3 py-2"

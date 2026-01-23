@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { confirmDialog } from "../../../utils/notify";
+import { confirmDialog } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function ContactList() {
     const [contacts, setContacts] = useState([]);
@@ -14,7 +15,7 @@ export default function ContactList() {
     const fetchContacts = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:8000/api/contact", {
+            const res = await adminAxios.get("/contact", {
                 params: { search, page },
             });
             setContacts(res.data.data);
@@ -50,7 +51,7 @@ export default function ContactList() {
         if (!confirmed) return;
 
         try {
-            await axios.delete(`http://localhost:8000/api/contact/${id}`);
+            await adminAxios.delete(`/contact/${id}`);
             toast.success("Đã xóa liên hệ thành công!");
             fetchContacts();
         } catch (err) {

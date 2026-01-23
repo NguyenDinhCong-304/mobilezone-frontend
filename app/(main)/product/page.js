@@ -14,7 +14,7 @@ export default function Product() {
   // load danh mục từ API
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/api/category");
+      const res = await axios.get("http://localhost:8000/api/category?status=1");
       setCategories(res.data.data ?? []);
     } catch (error) {
       console.error("Lỗi khi load danh mục:", error);
@@ -25,7 +25,7 @@ export default function Product() {
   const fetchProducts = async (pageNum = 1, catId = categoryId) => {
     setLoading(true);
     try {
-      let url = `http://localhost:8000/api/product-all?page=${pageNum}&limit=8`;
+      let url = `http://localhost:8000/api/product-all?page=${pageNum}&limit=8&status=1`;
       if (catId) {
         url += `&category_id=${catId}`;
       }
@@ -102,7 +102,6 @@ export default function Product() {
                 <li className="breadcrumb-item">
                   <a href="#">Tất cả sản phẩm</a>
                 </li>
-                
               </ol>
             </div>
           </div>
@@ -123,7 +122,8 @@ export default function Product() {
                         <li key={cat.id}>
                           <button
                             className="bg-transparent border-0 p-0 text-left 
-                                                    focus:outline-none focus:ring-0 focus:border-transparent active:border-transparent hover:text-orange-500 cursor-pointer"
+                                      focus:outline-none focus:ring-0 focus:border-transparent 
+                                      active:border-transparent hover:text-orange-500 cursor-pointer"
                             onClick={() => handleCategoryChange(cat.id)}
                           >
                             {" "}
@@ -255,7 +255,7 @@ export default function Product() {
                               {Math.round(
                                 ((product.price_buy - product.price_sale) /
                                   product.price_buy) *
-                                  100
+                                  100,
                               )}
                               %
                             </span>
@@ -284,7 +284,10 @@ export default function Product() {
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <button onClick={()=>handleAddToCart(product)} className="btn btn-outline-primary py-2 mb-2">
+                          <button
+                            onClick={() => handleAddToCart(product)}
+                            className="btn btn-outline-primary py-2 mb-2"
+                          >
                             Thêm vào giỏ hàng
                           </button>
                           <button className="btn btn-outline-info py-2">

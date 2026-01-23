@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { FileText, Package, ShoppingCart, Users } from "lucide-react";
-import DashboardOrderChart from "../_component/DashboardOrderChart";
+import DashboardOrderChart from "../../_component/DashboardOrderChart";
 
 export default function DashboardContent() {
   const [data, setData] = useState(null);

@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { notify, confirmDialog } from "../../../utils/notify";
+import { notify, confirmDialog } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function MenuList() {
   const [menus, setMenus] = useState([]);
@@ -15,7 +16,7 @@ export default function MenuList() {
   const fetchMenus = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:8000/api/menu", {
+      const res = await adminAxios.get("/menu", {
         params: { page, type: filterType },
       });
 
@@ -44,7 +45,7 @@ export default function MenuList() {
     if (!ok) return;
 
     try {
-      await axios.delete(`http://localhost:8000/api/menu/${id}`);
+      await adminAxios.delete(`/menu/${id}`);
       notify.success("Xóa menu thành công!");
       fetchMenus(filterType);
     } catch (err) {

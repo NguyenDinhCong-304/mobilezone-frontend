@@ -37,8 +37,13 @@ export default function useSummernote({
       const data = new FormData();
       data.append("file", file);
 
-      fetch("http://localhost:8000/api/upload/summernote", {
+      const token = localStorage.getItem("admin_token");
+
+      fetch("http://localhost:8000/api/admin/upload/summernote", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: data,
       })
         .then((res) => res.json())

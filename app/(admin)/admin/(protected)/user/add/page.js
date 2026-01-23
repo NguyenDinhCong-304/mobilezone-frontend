@@ -32,38 +32,42 @@ export default function UserAdd() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Reset lỗi
     setErrors({});
 
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(form.phone)) {
-        setErrors({ phone: "Số điện thoại phải gồm 10 chữ số!" });
-        return;
+      setErrors({ phone: "Số điện thoại phải gồm 10 chữ số!" });
+      return;
     }
 
-    // Kiểm tra mật khẩu
     if (form.password !== form.password_confirmation) {
       setErrors({ password_confirmation: "Mật khẩu xác nhận không khớp!" });
       return;
     }
 
     try {
+      const token = localStorage.getItem("admin_token");
+
       const formData = new FormData();
       for (const key in form) {
         formData.append(key, form[key]);
       }
 
-      await axios.post("http://localhost:8000/api/user", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      await axios.post("http://localhost:8000/api/admin/user", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
 
       alert("Thêm user thành công!");
       router.push("/admin/user");
     } catch (err) {
-      if (err.response && err.response.status === 422) {
-        // Validation lỗi từ backend
+      if (err.response?.status === 422) {
         setErrors(err.response.data.errors);
+      } else if (err.response?.status === 401) {
+        alert("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại!");
+        router.push("/admin/login");
       } else {
         console.error(err);
         alert("Lỗi khi thêm user!");
@@ -99,7 +103,9 @@ export default function UserAdd() {
             className="border p-2 w-full rounded"
             required
           />
-          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email}</p>
+          )}
         </div>
 
         {/* Số điện thoại */}
@@ -112,7 +118,9 @@ export default function UserAdd() {
             className="border p-2 w-full rounded"
             required
           />
-          {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+          {errors.phone && (
+            <p className="text-red-500 text-sm">{errors.phone}</p>
+          )}
         </div>
 
         {/* Tên đăng nhập */}
@@ -125,7 +133,9 @@ export default function UserAdd() {
             className="border p-2 w-full rounded"
             required
           />
-          {errors.username && <p className="text-red-500 text-sm">{errors.username}</p>}
+          {errors.username && (
+            <p className="text-red-500 text-sm">{errors.username}</p>
+          )}
         </div>
 
         {/* Mật khẩu */}
@@ -140,7 +150,9 @@ export default function UserAdd() {
               className="border p-2 w-full rounded"
               required
             />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-red-500 text-sm">{errors.password}</p>
+            )}
           </div>
           <div>
             <label className="block font-semibold">Xác nhận mật khẩu</label>
@@ -152,7 +164,11 @@ export default function UserAdd() {
               className="border p-2 w-full rounded"
               required
             />
-            {errors.password_confirmation && <p className="text-red-500 text-sm">{errors.password_confirmation}</p>}
+            {errors.password_confirmation && (
+              <p className="text-red-500 text-sm">
+                {errors.password_confirmation}
+              </p>
+            )}
           </div>
         </div>
 
@@ -160,7 +176,9 @@ export default function UserAdd() {
         <div>
           <label className="block font-semibold">Avatar</label>
           <input type="file" onChange={handleImageChange} />
-          {errors.avatar && <p className="text-red-500 text-sm">{errors.avatar}</p>}
+          {errors.avatar && (
+            <p className="text-red-500 text-sm">{errors.avatar}</p>
+          )}
         </div>
 
         {/* Quyền */}
@@ -175,7 +193,9 @@ export default function UserAdd() {
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
-          {errors.roles && <p className="text-red-500 text-sm">{errors.roles}</p>}
+          {errors.roles && (
+            <p className="text-red-500 text-sm">{errors.roles}</p>
+          )}
         </div>
 
         {/* Trạng thái */}
@@ -190,7 +210,9 @@ export default function UserAdd() {
             <option value={1}>Hiển thị</option>
             <option value={0}>Ẩn</option>
           </select>
-          {errors.status && <p className="text-red-500 text-sm">{errors.status}</p>}
+          {errors.status && (
+            <p className="text-red-500 text-sm">{errors.status}</p>
+          )}
         </div>
 
         {/* Nút hành động */}

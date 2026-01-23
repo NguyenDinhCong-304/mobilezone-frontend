@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function ReplyContact() {
   const { id } = useParams();
@@ -12,8 +13,8 @@ export default function ReplyContact() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:8000/api/contact/${id}`)
+    adminAxios
+      .get(`/contact/${id}`)
       .then((res) => {
         console.log('contactId: ', res.data.data);
         setContact(res.data.data);
@@ -38,7 +39,7 @@ export default function ReplyContact() {
     }
 
     try {
-      await axios.put(`http://localhost:8000/api/contact/${id}/reply`, {
+      await adminAxios.put(`/contact/${id}/reply`, {
         reply_content: replyContent,
         //updated_by: 12, // ID của admin (sửa theo thực tế)
         //updated_by: admin?.id

@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
-import axios from "axios";
+import adminAxios from "@/app/utils/adminAxios";
+import { notify, confirmDialog } from "@/app/utils/notify";
 
 export default function TopicList() {
     // const [topics, setTopics] = useState([]);
@@ -22,7 +23,7 @@ export default function TopicList() {
     const fetchTopics = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:8000/api/topic", {
+            const res = await adminAxios.get("/topic", {
                 params: { search, status, page },
             });
             setTopics(res.data.data);
@@ -48,15 +49,22 @@ export default function TopicList() {
 
     // Xóa danh mục
     const handleDelete = async (id) => {
-        if (!confirm("Bạn có chắc muốn xóa danh mục này không?")) return;
+        const isConfirmed = await confirmDialog({
+                    title: "Xóa chủ đề?",
+                    text: "Chủ đề sẽ bị xóa vĩnh viễn!",
+                    confirmText: "Xóa",
+                    cancelText: "Hủy",
+                });
+        
+                if (!isConfirmed) return;
 
         try {
-            const res = await axios.delete(`http://localhost:8000/api/topic/${id}`);
-            alert(res.data.message || "Xóa thành công!");
+            const res = await adminAxios.delete(`/topic/${id}`);
+            notify.success(res.data.message || "Xóa thành công!");
             fetchTopics(page);
         } catch (err) {
             console.error(err);
-            alert("Lỗi khi xóa chủ đề!");
+            notify.warning("Lỗi khi xóa chủ đề!");
         }
     };
     return (

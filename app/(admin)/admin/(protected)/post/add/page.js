@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import axios from "axios";
-import useSummernote from "../../_hooks/useSummernote";
-import { notify } from "../../../_utils/notify";
+import { useRouter } from "next/navigation";
+import useSummernote from "../../../_hooks/useSummernote";
+import { notify } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function PostAddPage() {
+    const router = useRouter();
     const [topics, setTopics] = useState([]);
     const [content, setContent] = useState("");
     const [form, setForm] = useState({
@@ -23,8 +25,8 @@ export default function PostAddPage() {
 
     // Lấy danh sách chủ đề
     useEffect(() => {
-        axios
-            .get("http://localhost:8000/api/topic") // endpoint trả danh sách topic
+        adminAxios
+            .get("/topic") // endpoint trả danh sách topic
             .then((res) => setTopics(res.data.data || res.data))
             .catch((err) => console.error("Lỗi khi tải chủ đề:", err));
     }, []);
@@ -47,9 +49,7 @@ export default function PostAddPage() {
         if (image) data.append("image", image);
 
         try {
-            const res = await axios.post("http://localhost:8000/api/post", data, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            const res = await adminAxios.post("/post", data);
 
             notify.success(
                 res.data?.message || "Thêm bài viết thành công!"

@@ -33,7 +33,9 @@ export default function Header() {
     setUser(null);
 
     notify.success("Đã đăng xuất thành công");
-    window.location.href = "/";
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1500);
   };
   return (
     <header className="section-header">
@@ -119,28 +121,6 @@ export default function Header() {
                     )}
                   </div>
                 </div>
-
-                {/* Message */}
-                {/* <div className="widget-header mr-3">
-                  <a href="#" className="widget-view">
-                    <span className="icon-area">
-                      <i className="fa fa-comment-dots"></i>
-                      <span className="notify">1</span>
-                    </span>
-                    <small className="text"> Message </small>
-                  </a>
-                </div> */}
-
-                {/* Orders */}
-                {/* <div className="widget-header mr-3">
-                  <a href="/order" className="widget-view">
-                    <span className="icon-area">
-                      <i className="fa fa-store"></i>
-                    </span>
-                    <small className="text"> Orders </small>
-                  </a>
-                </div> */}
-
                 {/* Cart */}
                 <div className="widget-header">
                   <a href="/cart" className="widget-view">

@@ -1,7 +1,8 @@
 "use client"
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {notify, confirmDialog} from "../../../utils/notify";
+import {notify, confirmDialog} from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function ContactList() {
     const [posts, setPosts] = useState([]);
@@ -20,7 +21,7 @@ export default function ContactList() {
     const fetchPosts = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:8000/api/post", {
+            const res = await adminAxios.get("/post", {
                 params: {
                     search,
                     topic_id: filterTopic,
@@ -38,8 +39,8 @@ export default function ContactList() {
     };
 
     useEffect(() => {
-        axios
-            .get("http://localhost:8000/api/topic")
+        adminAxios
+            .get("/topic")
             .then((res) => setTopic(res.data.data || res.data))
             .catch((err) => console.error(err));
     }, []);
@@ -65,7 +66,7 @@ export default function ContactList() {
         if (!isConfirmed) return;
 
         try {
-            const res = await axios.delete(`http://localhost:8000/api/post/${id}`);
+            const res = await adminAxios.delete(`/post/${id}`);
             notify.success(res.data?.message || "Xóa bài viết thành công!");
             fetchPosts(page);
         } catch (err) {
@@ -186,9 +187,9 @@ export default function ContactList() {
                                                     )}
                                                 </td>
                                                 <td className="items-center space-x-4">
-                                                    <button className="text-green-500">
+                                                    <a href={`/admin/post/${post.id}/show`} className="text-green-500">
                                                         <i className="fa-solid fa-eye"></i>
-                                                    </button>
+                                                    </a>
                                                     <a href={`/admin/post/${post.id}/edit`} className="text-blue-600">
                                                         <i className="fa fa-pencil"></i>
                                                     </a>

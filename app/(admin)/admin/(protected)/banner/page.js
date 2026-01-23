@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { confirmDialog } from "../../../utils/notify";
+import { confirmDialog } from "@/app/utils/notify";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function BannerList() {
     const [banners, setBanners] = useState([]);
@@ -15,7 +16,7 @@ export default function BannerList() {
     const fetchBanners = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:8000/api/banner", {
+            const res = await adminAxios.get("/banner", {
                 params: { search, status, page },
             });
             setBanners(res.data.data);
@@ -48,7 +49,7 @@ export default function BannerList() {
         if (!confirmed) return;
 
         try {
-            await axios.delete(`http://localhost:8000/api/banner/${id}`);
+            await adminAxios.delete(`/banner/${id}`);
             toast.success("Xóa banner thành công!");
             fetchBanners();
         } catch (err) {

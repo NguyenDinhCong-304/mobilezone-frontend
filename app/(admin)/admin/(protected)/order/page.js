@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react";
-import axios from "axios";
+import adminAxios from "@/app/utils/adminAxios";
+import { toast } from "react-toastify";
 
 export default function OrderList() {
     const [orders, setOrders] = useState([]);
@@ -13,7 +14,7 @@ export default function OrderList() {
     const fetchOrders = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:8000/api/order", {
+            const res = await adminAxios.get("/order", {
                 params: { search, status, page },
             });
             setOrders(res.data.data);
@@ -37,18 +38,9 @@ export default function OrderList() {
 
     const handleStatusChange = async (id, status) => {
         try {
-            const res = await fetch(`http://localhost:8000/api/order/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status }),
-            });
+            const res = await adminAxios.put(`/order/${id}`, { status });
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.message || "Cập nhật thất bại");
-            }
-            toast.success(data.message || "Đã cập nhật trạng thái đơn hàng!");
+            toast.success(res.message || "Đã cập nhật trạng thái đơn hàng!");
             // Reload lại danh sách
             setOrders((prev) =>
                 prev.map((order) =>
@@ -85,10 +77,10 @@ export default function OrderList() {
                             className="border px-3 py-2 rounded text-black"
                         >
                             <option value="">Tất cả trạng thái</option>
-                            <option value="1">Đã đặt</option>
-                            <option value="2">Đang giao</option>
-                            <option value="3">Đã Giao</option>
-                            <option value="0">Đã hủy</option>
+                            <option value={1}>Đã đặt</option>
+                            <option value={2}>Đang giao</option>
+                            <option value={3}>Đã giao</option>
+                            <option value={0}>Đã hủy</option>
                         </select>
                         <button
                             type="submit"
@@ -145,9 +137,11 @@ export default function OrderList() {
                                                         }
                                                         className="border rounded p-1"
                                                     >
-                                                        <option value={0}>Đã đặt</option>
-                                                        <option value={1}>Đang giao</option>
-                                                        <option value={2}>Đã giao</option>
+                                                        <option value={1}>Đã đặt</option>
+                                                        <option value={2}>Đang giao</option>
+                                                        <option value={3}>Đã giao</option>
+                                                        <option value={0}>Đã hủy</option>
+
                                                     </select>
                                                 </td>
 

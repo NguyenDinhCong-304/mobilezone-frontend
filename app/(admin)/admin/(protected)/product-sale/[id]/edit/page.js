@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import axios from "axios";
-import { notify } from "../../../../../utils/notify";
-import ProductSelector from "../../../_component/ProductSelector";
+import { notify } from "@/app/utils/notify";
+import ProductSelector from "../../../../_component/ProductSelector";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function EditProductSale() {
   const { id } = useParams();
@@ -32,7 +32,7 @@ export default function EditProductSale() {
 
     const fetchSale = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/productsale/${id}`);
+        const res = await adminAxios.get(`/productsale/${id}`);
         const s = res.data;
 
         setSaleData({
@@ -63,7 +63,8 @@ export default function EditProductSale() {
     setLoading(true);
 
     try {
-      await axios.put(`http://localhost:8000/api/productsale/${id}`, saleData);
+      await adminAxios.put(`/productsale/${id}`, saleData);
+
       notify.success("Cập nhật khuyến mãi thành công!");
       router.push("/admin/product-sale");
     } catch (err) {

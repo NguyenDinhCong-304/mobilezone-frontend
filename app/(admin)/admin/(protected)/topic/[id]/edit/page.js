@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import slugify from "slugify";
 import { useRouter, useParams } from "next/navigation";
+import adminAxios from "@/app/utils/adminAxios";
+import { notify } from "@/app/utils/notify";
 
 export default function EditTopic() {
   const router = useRouter();
@@ -24,7 +26,7 @@ export default function EditTopic() {
   useEffect(() => {
     const fetchTopic = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/api/topic/${id}`);
+        const res = await adminAxios.get(`/topic/${id}`);
         const data = res.data.data;
 
         // Gán dữ liệu từ API vào form
@@ -45,14 +47,14 @@ export default function EditTopic() {
     if (id) fetchTopic();
   }, [id]);
 
-  // ✅ Cập nhật chủ đề
+  // Cập nhật chủ đề
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      await axios.post(`http://localhost:8000/api/topic/${id}?_method=PUT`, {
+      await adminAxios.post(`/topic/${id}?_method=PUT`, {
         name,
         slug: slug || slugify(name, { lower: true }),
         sort_order: sortOrder,
@@ -60,7 +62,7 @@ export default function EditTopic() {
         status,
       });
 
-      alert("Cập nhật chủ đề thành công!");
+      notify.success("Cập nhật chủ đề thành công!");
       router.push("/admin/topic");
     } catch (err) {
       console.error(err);
@@ -70,7 +72,7 @@ export default function EditTopic() {
     }
   };
 
-  // ✅ Nếu đang tải dữ liệu
+  // Nếu đang tải dữ liệu
   if (loadingData) {
     return <p className="text-center mt-10 text-gray-500">Đang tải dữ liệu...</p>;
   }

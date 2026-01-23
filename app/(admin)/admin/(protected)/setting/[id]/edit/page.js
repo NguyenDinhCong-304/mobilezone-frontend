@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import adminAxios from "@/app/utils/adminAxios";
 
 export default function EditSettingPage() {
   const router = useRouter();
@@ -20,12 +21,22 @@ export default function EditSettingPage() {
   });
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/setting/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data) setFormData(data.data);
-      })
-      .catch((err) => console.error("Error:", err));
+    if (!id) return;
+
+    const fetchSetting = async () => {
+      try {
+        const res = await adminAxios.get(`/setting/${id}`);
+
+        // Chuẩn Laravel Resource
+        if (res.data?.data) {
+          setFormData(res.data.data);
+        }
+      } catch (err) {
+        console.error("Lỗi tải setting:", err);
+      }
+    };
+
+    fetchSetting();
   }, [id]);
 
   const handleChange = (e) => {
@@ -35,23 +46,24 @@ export default function EditSettingPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch(`http://localhost:8000/api/setting/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
 
-      if (res.ok) {
-        toast.success("Cập nhật thành công!");
-        setTimeout(() => router.push("/admin/setting"), 1000);
-      } else {
-        toast.error("Cập nhật thất bại!");
-      }
+    try {
+      const res = await adminAxios.put(`/setting/${id}`, formData);
+
+      toast.success(res.data?.message || "Cập nhật thành công!");
+      setTimeout(() => {
+        router.push("/admin/setting");
+      }, 1000);
     } catch (err) {
-      toast.error("Lỗi khi cập nhật!");
+      console.error(err);
+
+      if (err.response?.status === 422) {
+        const errors = err.response.data.errors;
+        const messages = Object.values(errors).flat().join("\n");
+        toast.error("Dữ liệu không hợp lệ:\n" + messages);
+      } else {
+        toast.error(err.response?.data?.message || "Lỗi khi cập nhật!");
+      }
     }
   };
 
@@ -63,7 +75,10 @@ export default function EditSettingPage() {
           <i className="fa fa-angle-right"></i> Cập nhật cài đặt
         </h3>
 
-        <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow-md">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 bg-white p-6 rounded shadow-md"
+        >
           <div>
             <label className="block font-semibold mb-1">Tên website</label>
             <input
